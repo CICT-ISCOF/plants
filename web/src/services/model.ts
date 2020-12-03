@@ -1,6 +1,7 @@
 import { Model as ModelContract } from './contracts';
 import firebase from 'firebase';
 import 'firebase/firestore';
+import toastr from 'toastr';
 
 export default class Model<T extends ModelContract> {
 	protected data?: T;
@@ -33,6 +34,7 @@ export default class Model<T extends ModelContract> {
 	}
 
 	create(data: T) {
+		toastr.info('Creating new data to server.');
 		return this.collection.add({
 			...data,
 			created_at: firebase.firestore.FieldValue.serverTimestamp(),
@@ -41,6 +43,7 @@ export default class Model<T extends ModelContract> {
 	}
 
 	update() {
+		toastr.info('Sending updated data to server.');
 		return this.collection.doc((this.data as T).id as string).update({
 			...this.getData(),
 			updated_at: firebase.firestore.FieldValue.serverTimestamp(),
@@ -51,12 +54,12 @@ export default class Model<T extends ModelContract> {
 		this.collection.onSnapshot(
 			(snapshot) => {
 				const data: Array<T> = [];
-				snapshot.forEach((document) => {
+				snapshot.forEach((document) =>
 					data.push({
 						...(document.data() as T),
 						id: document.id,
-					});
-				});
+					})
+				);
 				callback(data);
 			},
 			(error) => (onError ? onError(error) : null)
@@ -74,6 +77,7 @@ export default class Model<T extends ModelContract> {
 	}
 
 	async delete(id: string) {
+		toastr.info('Deleting data from server.');
 		return await this.collection.doc(id).delete();
 	}
 
