@@ -3,6 +3,8 @@ import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 import routes from '../../routes';
 import state from '../../services/state';
 import Categories from '../Categories';
+import Pests from '../Pests';
+import Plants from '../Plants';
 import Tips from '../Tips';
 import Footer from './footer';
 import Navbar from './navbar';
@@ -11,7 +13,7 @@ import Sidebar from './sidebar';
 export default class Dashboard extends Component<RouteComponentProps> {
 	async componentDidMount() {
 		if (!state.has('user')) {
-			this.props.history.goBack();
+			// this.props.history.goBack();
 		}
 	}
 
@@ -24,7 +26,7 @@ export default class Dashboard extends Component<RouteComponentProps> {
 			<div className='wrapper'>
 				<Sidebar {...this.props} />
 				<div className='main-panel' style={{ height: '100vh' }}>
-					<Navbar />
+					<Navbar {...this.props} />
 					<div className='content'>
 						<button
 							className='btn btn-info btn-sm'
@@ -44,6 +46,14 @@ export default class Dashboard extends Component<RouteComponentProps> {
 							<Route
 								path={this.path(routes.TIPS)}
 								component={Tips}
+							/>
+							<Route
+								path={this.path(routes.PLANTS)}
+								component={Plants}
+							/>
+							<Route
+								path={this.path(routes.PESTS)}
+								component={Pests}
 							/>
 						</Switch>
 					</div>

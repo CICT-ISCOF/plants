@@ -1,17 +1,17 @@
 import React, { Component, createRef } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import firebase from 'firebase';
-import 'firebase/firestore';
-import { Category } from '../../services/contracts';
+import { Category, Plant } from '../../services/contracts';
 import toastr from 'toastr';
 import Model from '../../services/model';
 
 type State = {
 	id?: string;
-	title: string;
+	name: string;
 	photo_url: string;
 	mode: 'Add' | 'Edit';
 	processing: boolean;
+	category_id: string;
+	categories: Array<Category>;
 };
 
 type Params = {
@@ -22,6 +22,7 @@ export default class Form extends Component<
 	RouteComponentProps<Params>,
 	State
 > {
+	categoryService = new Model<Category>(undefined, 'categories');
 	fileInputRef = createRef<HTMLInputElement>();
 	fileReader = new FileReader();
 
@@ -30,25 +31,33 @@ export default class Form extends Component<
 		this.state = {
 			id: '',
 			mode: 'Add',
-			title: '',
+			name: '',
 			photo_url: 'https://via.placeholder.com/800x200',
 			processing: false,
+			category_id: '',
+			categories: [],
 		};
 	}
 
 	componentDidMount() {
+		this.categoryService.get((categories) => {
+			this.setState({
+				categories,
+				category_id:
+					categories.length > 0 ? (categories[0].id as string) : '',
+			});
+		});
 		const fragments = this.props.match.path.split('/');
 		if (fragments.includes('edit')) {
 			const id = this.props.match.params.id;
-			new Model<Category>(undefined, 'categories')
-				.find(id)
-				.then((document) => {
-					this.setState({
-						mode: 'Edit',
-						...document,
-						processing: false,
-					});
+			new Model<Plant>(undefined, 'plants').find(id).then((document) => {
+				this.setState({
+					mode: 'Edit',
+					...document,
+					processing: false,
+					categories: this.state.categories,
 				});
+			});
 		}
 		this.fileReader.onload = (event) => {
 			this.setState({
@@ -75,8 +84,8 @@ export default class Form extends Component<
 			processing: true,
 		});
 		this.request()
-			.then(() => toastr.success('Category saved successfully.'))
-			.catch(() => toastr.error('Unable to save Category.'))
+			.then(() => toastr.success('Plant saved successfully.'))
+			.catch(() => toastr.error('Unable to save Plant.'))
 			.finally(() =>
 				this.setState({
 					processing: false,
@@ -85,13 +94,14 @@ export default class Form extends Component<
 	}
 
 	request() {
-		return new Model<Category>(
+		return new Model<Plant>(
 			{
 				id: this.state.id,
-				title: this.state.title,
+				name: this.state.name,
 				photo_url: this.state.photo_url,
+				category_id: this.state.category_id,
 			},
-			'categories'
+			'plants'
 		).save();
 	}
 
@@ -124,24 +134,50 @@ export default class Form extends Component<
 						/>
 					</div>
 					<div className='form-group'>
-						<label htmlFor='title'>Title:</label>
+						<label htmlFor='name'>Name:</label>
 						<input
 							type='text'
-							name='title'
-							id='title'
-							placeholder='Title'
+							name='name'
+							id='name'
+							placeholder='Name'
 							className={`form-control form-control-sm ${
 								this.state.processing ? 'disabled' : ''
 							}`}
-							value={this.state.title}
+							disabled={this.state.processing}
+							value={this.state.name}
 							onChange={(e) => {
 								e.preventDefault();
 								this.setState({
-									title: e.target.value,
+									name: e.target.value,
 								});
 							}}
-							disabled={this.state.processing}
 						/>
+					</div>
+					<div className='form-group'>
+						<label htmlFor='category_id'>Category:</label>
+						<select
+							name='category_id'
+							id='category_id'
+							className={`form-control form-control-sm ${
+								this.state.processing ? 'disabled' : ''
+							}`}
+							disabled={this.state.processing}
+							onChange={(e) => {
+								e.preventDefault();
+								this.setState({
+									category_id: e.target.value,
+								});
+							}}
+						>
+							{this.state.categories.map((category, index) => (
+								<option
+									value={category.id as string}
+									key={index}
+								>
+									{category.title}
+								</option>
+							))}
+						</select>
 					</div>
 					<div className='form-group'>
 						<button

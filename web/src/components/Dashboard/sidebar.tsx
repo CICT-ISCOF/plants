@@ -31,10 +31,16 @@ export default class Sidebar extends Component<RouteComponentProps> {
 							</Link>
 						</li>
 						<li>
-							<a href='javascript:;'>
+							<Link to={this.path(routes.PLANTS)}>
+								<i className='nc-icon nc-tag-content'></i>
+								<p>Plants</p>
+							</Link>
+						</li>
+						<li>
+							<Link to={this.path(routes.PESTS)}>
 								<i className='nc-icon nc-planet'></i>
 								<p>Pests</p>
-							</a>
+							</Link>
 						</li>
 						<li>
 							<a href='javascript:;'>

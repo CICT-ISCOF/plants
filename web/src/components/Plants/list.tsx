@@ -1,34 +1,40 @@
 import React, { Component } from 'react';
-import { Category } from '../../services/contracts';
+import { Category, Plant } from '../../services/contracts';
 
 import { Link, RouteComponentProps } from 'react-router-dom';
 import db from '../../firebase/firestore';
 import state from '../../services/state';
 import toastr from 'toastr';
+import Model from '../../services/model';
 
 type State = {
-	categories: Array<Category>;
+	plants: Array<Plant>;
+	categories: {
+		[id: string]: Category;
+	};
 };
 
 export default class List extends Component<RouteComponentProps, State> {
+	categoryService = new Model<Category>(undefined, 'categories');
+	plantService = new Model<Plant>(undefined, 'plants');
 	constructor(props: RouteComponentProps) {
 		super(props);
 		this.state = {
-			categories: [],
+			plants: [],
+			categories: {},
 		};
 	}
 
 	componentDidMount() {
-		const collection = db.collection('categories');
-		collection.onSnapshot((snapshot) => {
-			const categories: Array<Category> = [];
-			snapshot.forEach((document) =>
-				categories.push({
-					...(document.data() as Category),
-					id: document.id,
-				})
-			);
-			this.setState({ categories });
+		this.categoryService.get((categories) => {
+			const data = this.state.categories;
+			categories.forEach((category) => {
+				data[category.id as string] = category;
+			});
+			this.setState({ categories: data });
+		});
+		this.plantService.get((plants) => {
+			this.setState({ plants });
 		});
 	}
 
@@ -37,28 +43,24 @@ export default class List extends Component<RouteComponentProps, State> {
 	}
 
 	remove(index: number) {
-		const category = this.state.categories[index];
-		const modalID = `#deleteCategoryModal${category.id}`;
+		const plant = this.state.plants[index];
+		const modalID = `#deletePlantModal${plant.id}`;
 		const modal = $(modalID) as any;
 		modal.on('hidden.bs.modal', async () => {
-			const document = db.collection('categories').doc(category.id);
-			db.collection('plants')
-				.where('category_id', '==', category.id)
-				.get()
-				.then((plants) => {
-					plants.forEach((plant) =>
-						db.collection('plants').doc(plant.id).delete()
-					);
-				});
+			const document = db.collection('plants').doc(plant.id);
 			try {
 				await document.delete();
-				toastr.success('Category deleted successfully.');
+				toastr.success('Plant deleted successfully.');
 			} catch (error) {
 				console.log(error);
-				toastr.error('Unable to delete category.');
+				toastr.error('Unable to delete Plant.');
 			}
 		});
 		modal.modal('hide');
+	}
+
+	getCategoryName(plant: Plant) {
+		return this.state.categories[plant.category_id].title;
 	}
 
 	render() {
@@ -75,28 +77,32 @@ export default class List extends Component<RouteComponentProps, State> {
 					) : null}
 				</div>
 				<div className='row'>
-					{this.state.categories.length > 0 ? (
-						this.state.categories.map((category, index) => (
+					{this.state.plants.length > 0 ? (
+						this.state.plants.map((plant, index) => (
 							<div
 								className='col-sm-12 col-md-6 col-lg-4 col-xl-3 p-3'
-								data-id={category.id}
+								data-id={plant.id}
 								key={index}
 							>
 								<div className='card'>
 									<img
-										src={category.photo_url}
-										alt={category.title}
+										src={plant.photo_url}
+										alt={plant.name}
 										className='card-img-top'
 									/>
 									<div className='card-body'>
-										<div className='card-title'>
-											{category.title}
-										</div>
+										<h3 className='card-title'>
+											{plant.name}
+										</h3>
+										<p className='card-text'>
+											Category:{' '}
+											{this.getCategoryName(plant)}
+										</p>
 										{state.has('user') ? (
 											<Link
 												className='btn btn-info btn-sm'
 												to={this.path(
-													`${category.id}/edit`
+													`${plant.id}/edit`
 												)}
 											>
 												Edit
@@ -106,10 +112,10 @@ export default class List extends Component<RouteComponentProps, State> {
 											<a
 												className='btn btn-danger btn-sm'
 												href={this.path(
-													`/${category.id}/delete`
+													`/${plant.id}/delete`
 												)}
 												data-toggle='modal'
-												data-target={`#deleteCategoryModal${category.id}`}
+												data-target={`#deletePlantModal${plant.id}`}
 											>
 												Delete
 											</a>
@@ -117,10 +123,10 @@ export default class List extends Component<RouteComponentProps, State> {
 										{state.has('user') ? (
 											<div
 												className='modal fade'
-												id={`deleteCategoryModal${category.id}`}
+												id={`deletePlantModal${plant.id}`}
 												tabIndex={-1}
 												role='dialog'
-												aria-labelledby={`deleteCategoryModalLabel${category.id}`}
+												aria-labelledby={`deletePlantModalLabel${plant.id}`}
 												aria-hidden='true'
 											>
 												<div
@@ -131,9 +137,9 @@ export default class List extends Component<RouteComponentProps, State> {
 														<div className='modal-header'>
 															<h5
 																className='modal-title'
-																id={`deleteCategoryModalLabel${category.id}`}
+																id={`deletePlantModalLabel${plant.id}`}
 															>
-																Delete Category
+																Delete Plant
 															</h5>
 															<button
 																type='button'
@@ -149,7 +155,7 @@ export default class List extends Component<RouteComponentProps, State> {
 														<div className='modal-body'>
 															Are you sure you
 															want to delete{' '}
-															{category.title}?
+															{plant.name}?
 														</div>
 														<div className='modal-footer'>
 															<button

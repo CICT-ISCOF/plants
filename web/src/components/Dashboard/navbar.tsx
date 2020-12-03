@@ -1,21 +1,27 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, RouteComponentProps } from 'react-router-dom';
 import routes from '../../routes';
 import state from '../../services/state';
 import firebase from 'firebase';
 
-export default class Navbar extends Component<{}, { email: string }> {
-	constructor(props: {}) {
+export default class Navbar extends Component<
+	RouteComponentProps,
+	{ email: string }
+> {
+	constructor(props: RouteComponentProps) {
 		super(props);
 		this.state = {
-			email: state.get<firebase.auth.UserCredential>('user').user
-				?.email as string,
+			email: state.has('user')
+				? (state.get<firebase.auth.UserCredential>('user').user
+						?.email as string)
+				: '',
 		};
 	}
 
 	logout() {
 		firebase.auth().signOut();
 		state.remove('user').remove('id');
+		this.props.history.goBack();
 	}
 
 	render() {
@@ -52,38 +58,69 @@ export default class Navbar extends Component<{}, { email: string }> {
 						id='navigation'
 					>
 						<ul className='navbar-nav'>
-							<li className='nav-item btn-rotate dropdown'>
-								<a
-									className='nav-link dropdown-toggle'
-									href='/'
-									id='navbarDropdownMenuLink'
-									data-toggle='dropdown'
-									aria-haspopup='true'
-									aria-expanded='false'
-								>
-									<i className='nc-icon nc-bell-55'></i>
-									<p>
-										<span className='d-lg-none d-md-block'>
-											{this.state.email}
-										</span>
-									</p>
-								</a>
-								<div
-									className='dropdown-menu dropdown-menu-right'
-									aria-labelledby='navbarDropdownMenuLink'
-								>
+							{state.has('user') ? (
+								<li className='nav-item btn-rotate dropdown'>
 									<a
-										className='dropdown-item'
+										className='nav-link dropdown-toggle'
 										href='/'
-										onClick={(e) => {
-											e.preventDefault();
-											this.logout();
-										}}
+										id='navbarDropdownMenuLink'
+										data-toggle='dropdown'
+										aria-haspopup='true'
+										aria-expanded='false'
 									>
-										Logout
+										<i className='nc-icon nc-bell-55'></i>
+										<p>
+											<span className='d-lg-none d-md-block'>
+												{this.state.email}
+											</span>
+										</p>
 									</a>
-								</div>
-							</li>
+									<div
+										className='dropdown-menu dropdown-menu-right'
+										aria-labelledby='navbarDropdownMenuLink'
+									>
+										<a
+											className='dropdown-item'
+											href='/'
+											onClick={(e) => {
+												e.preventDefault();
+												this.logout();
+											}}
+										>
+											Logout
+										</a>
+									</div>
+								</li>
+							) : (
+								<li className='nav-item btn-rotate dropdown'>
+									<a
+										className='nav-link dropdown-toggle'
+										href='/'
+										id='navbarDropdownMenuLink'
+										data-toggle='dropdown'
+										aria-haspopup='true'
+										aria-expanded='false'
+									>
+										<i className='nc-icon nc-bell-55'></i>
+										<p>
+											<span className='d-lg-none d-md-block'>
+												Menu
+											</span>
+										</p>
+									</a>
+									<div
+										className='dropdown-menu dropdown-menu-right'
+										aria-labelledby='navbarDropdownMenuLink'
+									>
+										<Link
+											className='dropdown-item'
+											to={routes.LOGIN}
+										>
+											Login
+										</Link>
+									</div>
+								</li>
+							)}
 						</ul>
 					</div>
 				</div>

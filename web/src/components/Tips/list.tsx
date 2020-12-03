@@ -57,122 +57,132 @@ export default class List extends Component<RouteComponentProps, State> {
 		return (
 			<div className='container pt-3'>
 				<div className='d-flex'>
-					<Link
-						to={this.path('add')}
-						className='btn btn-secondary btn-sm'
-					>
-						Add
-					</Link>
+					{state.has('user') ? (
+						<Link
+							to={this.path('add')}
+							className='btn btn-secondary btn-sm'
+						>
+							Add
+						</Link>
+					) : null}
 				</div>
 				<div className='row'>
-					{this.state.tips.map((tip, index) => (
-						<div
-							className='col-sm-12 p-3 border rounded shadow'
-							data-id={tip.id}
-							key={index}
-						>
-							<h3 className='mb-0'>{tip.title}</h3>
-							<div className='d-flex'>
-								{state.has('user') ? (
-									<Link
-										className='btn btn-info btn-sm mx-1'
-										to={this.path(`${tip.id}/edit`)}
-									>
-										Edit
-									</Link>
-								) : null}
-								{state.has('user') ? (
-									<a
-										className='btn btn-danger btn-sm mx-1'
-										href={this.path(`/${tip.id}/delete`)}
-										data-toggle='modal'
-										data-target={`#deleteTipModal${tip.id}`}
-									>
-										Delete
-									</a>
-								) : null}
-								{state.has('user') ? (
-									<div
-										className='modal fade'
-										id={`deleteTipModal${tip.id}`}
-										tabIndex={-1}
-										role='dialog'
-										aria-labelledby={`deleteTipModalLabel${tip.id}`}
-										aria-hidden='true'
-									>
-										<div
-											className='modal-dialog modal-dialog-centered'
-											role='document'
+					{this.state.tips.length > 0 ? (
+						this.state.tips.map((tip, index) => (
+							<div
+								className='col-sm-12 p-3 border rounded shadow'
+								data-id={tip.id}
+								key={index}
+							>
+								<h3 className='mb-0'>{tip.title}</h3>
+								<div className='d-flex'>
+									{state.has('user') ? (
+										<Link
+											className='btn btn-info btn-sm mx-1'
+											to={this.path(`${tip.id}/edit`)}
 										>
-											<div className='modal-content'>
-												<div className='modal-header'>
-													<h5
-														className='modal-title'
-														id={`deleteCategoryModalLabel${tip.id}`}
-													>
-														Delete Tip
-													</h5>
-													<button
-														type='button'
-														className='close'
-														data-dismiss='modal'
-														aria-label='Close'
-													>
-														<span aria-hidden='true'>
-															&times;
-														</span>
-													</button>
+											Edit
+										</Link>
+									) : null}
+									{state.has('user') ? (
+										<a
+											className='btn btn-danger btn-sm mx-1'
+											href={this.path(
+												`/${tip.id}/delete`
+											)}
+											data-toggle='modal'
+											data-target={`#deleteTipModal${tip.id}`}
+										>
+											Delete
+										</a>
+									) : null}
+									{state.has('user') ? (
+										<div
+											className='modal fade'
+											id={`deleteTipModal${tip.id}`}
+											tabIndex={-1}
+											role='dialog'
+											aria-labelledby={`deleteTipModalLabel${tip.id}`}
+											aria-hidden='true'
+										>
+											<div
+												className='modal-dialog modal-dialog-centered'
+												role='document'
+											>
+												<div className='modal-content'>
+													<div className='modal-header'>
+														<h5
+															className='modal-title'
+															id={`deleteCategoryModalLabel${tip.id}`}
+														>
+															Delete Tip
+														</h5>
+														<button
+															type='button'
+															className='close'
+															data-dismiss='modal'
+															aria-label='Close'
+														>
+															<span aria-hidden='true'>
+																&times;
+															</span>
+														</button>
+													</div>
+													<div className='modal-body'>
+														Are you sure you want to
+														delete {tip.title}?
+													</div>
+													<div className='modal-footer'>
+														<button
+															type='button'
+															className='btn btn-danger btn-sm'
+															onClick={(e) => {
+																e.preventDefault();
+																this.remove(
+																	index
+																);
+															}}
+														>
+															Delete
+														</button>
+														<button
+															type='button'
+															className='btn btn-secondary btn-sm'
+															data-dismiss='modal'
+														>
+															Close
+														</button>
+													</div>
 												</div>
-												<div className='modal-body'>
-													Are you sure you want to
-													delete {tip.title}?
-												</div>
-												<div className='modal-footer'>
-													<button
-														type='button'
-														className='btn btn-danger btn-sm'
-														onClick={(e) => {
-															e.preventDefault();
-															this.remove(index);
+											</div>
+										</div>
+									) : null}
+								</div>
+								{tip.items.length > 0
+									? tip.items.map((item, index) => (
+											<div className='card'>
+												<div className='card-body'>
+													<img
+														src={item.photo_url}
+														alt=''
+														className='card-img-top'
+														style={{
+															maxHeight: '200px',
 														}}
-													>
-														Delete
-													</button>
-													<button
-														type='button'
-														className='btn btn-secondary btn-sm'
-														data-dismiss='modal'
-													>
-														Close
-													</button>
+													/>
+													<h4>{item.title}</h4>
+													<div className='card-text'>
+														{item.description}
+													</div>
 												</div>
 											</div>
-										</div>
-									</div>
-								) : null}
+									  ))
+									: null}
 							</div>
-							{tip.items.length > 0
-								? tip.items.map((item, index) => (
-										<div className='card'>
-											<div className='card-body'>
-												<img
-													src={item.photo_url}
-													alt=''
-													className='card-img-top'
-													style={{
-														maxHeight: '200px',
-													}}
-												/>
-												<h4>{item.title}</h4>
-												<div className='card-text'>
-													{item.description}
-												</div>
-											</div>
-										</div>
-								  ))
-								: null}
-						</div>
-					))}
+						))
+					) : (
+						<div className='col-12 text-center'>No Data</div>
+					)}
 				</div>
 			</div>
 		);

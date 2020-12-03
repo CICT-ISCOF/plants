@@ -2,16 +2,18 @@ import React, { Component, createRef } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import firebase from 'firebase';
 import 'firebase/firestore';
-import { Category } from '../../services/contracts';
+import { Pest, Plant } from '../../services/contracts';
 import toastr from 'toastr';
 import Model from '../../services/model';
 
 type State = {
 	id?: string;
-	title: string;
-	photo_url: string;
+	name: string;
+	affected_plant_ids: Array<string>;
+	plants: Array<Plant>;
 	mode: 'Add' | 'Edit';
 	processing: boolean;
+	photo_url: string;
 };
 
 type Params = {
@@ -22,6 +24,7 @@ export default class Form extends Component<
 	RouteComponentProps<Params>,
 	State
 > {
+	plantService = new Model<Plant>(undefined, 'plants');
 	fileInputRef = createRef<HTMLInputElement>();
 	fileReader = new FileReader();
 
@@ -30,25 +33,27 @@ export default class Form extends Component<
 		this.state = {
 			id: '',
 			mode: 'Add',
-			title: '',
-			photo_url: 'https://via.placeholder.com/800x200',
+			name: '',
+			affected_plant_ids: [],
+			plants: [],
 			processing: false,
+			photo_url: 'https://via.placeholder.com/800x200',
 		};
 	}
 
 	componentDidMount() {
+		this.plantService.get((plants) => this.setState({ plants }));
 		const fragments = this.props.match.path.split('/');
 		if (fragments.includes('edit')) {
 			const id = this.props.match.params.id;
-			new Model<Category>(undefined, 'categories')
-				.find(id)
-				.then((document) => {
-					this.setState({
-						mode: 'Edit',
-						...document,
-						processing: false,
-					});
+			new Model<Pest>(undefined, 'pests').find(id).then((document) => {
+				this.setState({
+					mode: 'Edit',
+					...document,
+					processing: false,
+					plants: this.state.plants,
 				});
+			});
 		}
 		this.fileReader.onload = (event) => {
 			this.setState({
@@ -75,8 +80,8 @@ export default class Form extends Component<
 			processing: true,
 		});
 		this.request()
-			.then(() => toastr.success('Category saved successfully.'))
-			.catch(() => toastr.error('Unable to save Category.'))
+			.then(() => toastr.success('Pest saved successfully.'))
+			.catch(() => toastr.error('Unable to save Pest.'))
 			.finally(() =>
 				this.setState({
 					processing: false,
@@ -85,13 +90,14 @@ export default class Form extends Component<
 	}
 
 	request() {
-		return new Model<Category>(
+		return new Model<Pest>(
 			{
 				id: this.state.id,
-				title: this.state.title,
+				name: this.state.name,
 				photo_url: this.state.photo_url,
+				affected_plant_ids: this.state.affected_plant_ids,
 			},
-			'categories'
+			'pests'
 		).save();
 	}
 
@@ -124,24 +130,73 @@ export default class Form extends Component<
 						/>
 					</div>
 					<div className='form-group'>
-						<label htmlFor='title'>Title:</label>
+						<label htmlFor='name'>Name:</label>
 						<input
 							type='text'
-							name='title'
-							id='title'
-							placeholder='Title'
+							name='name'
+							id='name'
+							placeholder='Name'
 							className={`form-control form-control-sm ${
 								this.state.processing ? 'disabled' : ''
 							}`}
-							value={this.state.title}
+							value={this.state.name}
 							onChange={(e) => {
 								e.preventDefault();
 								this.setState({
-									title: e.target.value,
+									name: e.target.value,
 								});
 							}}
 							disabled={this.state.processing}
 						/>
+					</div>
+					<div className='form-group'>
+						<label htmlFor='affected_plant_ids'>
+							Affected Plants:
+						</label>
+						<div className='container-fluid row'>
+							{this.state.plants.map((plant) => (
+								<div className='col-12 col-md-4 col-lg-3'>
+									<div className='custom-control custom-checkbox'>
+										<input
+											type='checkbox'
+											className='custom-control-input'
+											id={`plant-${plant.id}`}
+											checked={this.state.affected_plant_ids.includes(
+												plant.id as string
+											)}
+											onChange={(e) => {
+												// e.preventDefault();
+												const ids = this.state
+													.affected_plant_ids;
+												if (
+													this.state.affected_plant_ids.includes(
+														plant.id as string
+													)
+												) {
+													const index = ids.indexOf(
+														plant.id as string
+													);
+													ids.splice(index, 1);
+												} else {
+													ids.push(
+														plant.id as string
+													);
+												}
+												this.setState({
+													affected_plant_ids: ids,
+												});
+											}}
+										/>
+										<label
+											className='custom-control-label'
+											htmlFor={`plant-${plant.id}`}
+										>
+											{plant.name}
+										</label>
+									</div>
+								</div>
+							))}
+						</div>
 					</div>
 					<div className='form-group'>
 						<button

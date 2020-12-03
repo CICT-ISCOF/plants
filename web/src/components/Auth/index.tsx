@@ -26,6 +26,12 @@ export default class Auth extends Component<RouteComponentProps, State> {
 		};
 	}
 
+	componentDidMount() {
+		if (state.has('user')) {
+			this.props.history.push(routes.DASHBOARD);
+		}
+	}
+
 	async authenticate(e: FormEvent<HTMLFormElement>) {
 		e.preventDefault();
 		this.setState({ processing: true });
