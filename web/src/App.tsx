@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import './App.css';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import 'toastr/build/toastr.css';
-import './firebase';
 import routes from './routes';
 import Auth from './components/Auth';
 import Dashboard from './components/Dashboard';

@@ -68,7 +68,7 @@ export default class Navbar extends Component<
 										aria-haspopup='true'
 										aria-expanded='false'
 									>
-										<i className='nc-icon nc-bell-55'></i>
+										<i className='nc-icon nc-circle-10'></i>
 										<p>
 											<span className='d-lg-none d-md-block'>
 												{this.state.email}
@@ -101,7 +101,7 @@ export default class Navbar extends Component<
 										aria-haspopup='true'
 										aria-expanded='false'
 									>
-										<i className='nc-icon nc-bell-55'></i>
+										<i className='nc-icon nc-tile-56'></i>
 										<p>
 											<span className='d-lg-none d-md-block'>
 												Menu
