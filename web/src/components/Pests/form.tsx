@@ -12,6 +12,7 @@ type State = {
 	mode: 'Add' | 'Edit';
 	processing: boolean;
 	photo_url: string;
+	description: string;
 };
 
 type Params = {
@@ -36,6 +37,7 @@ export default class Form extends Component<
 			plants: [],
 			processing: false,
 			photo_url: 'https://via.placeholder.com/800x200',
+			description: '',
 		};
 	}
 
@@ -94,6 +96,7 @@ export default class Form extends Component<
 				name: this.state.name,
 				photo_url: this.state.photo_url,
 				affected_plant_ids: this.state.affected_plant_ids,
+				description: this.state.description,
 			},
 			'pests'
 		).save();
@@ -146,6 +149,25 @@ export default class Form extends Component<
 							}}
 							disabled={this.state.processing}
 						/>
+					</div>
+					<div className='form-group'>
+						<label htmlFor='description'>Description:</label>
+						<textarea
+							name='description'
+							id='description'
+							placeholder='Description'
+							className={`form-control form-control-sm ${
+								this.state.processing ? 'disabled' : ''
+							}`}
+							value={this.state.description}
+							onChange={(e) => {
+								e.preventDefault();
+								this.setState({
+									description: e.target.value,
+								});
+							}}
+							disabled={this.state.processing}
+						></textarea>
 					</div>
 					<div className='form-group'>
 						<label htmlFor='affected_plant_ids'>

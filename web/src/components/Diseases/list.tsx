@@ -83,6 +83,9 @@ export default class List extends Component<RouteComponentProps, State> {
 										<h3 className='card-title'>
 											{disease.title}
 										</h3>
+										<p className='card-text'>
+											{disease.description}
+										</p>
 										<div className='p-4'>
 											<h6>Symptoms</h6>
 											<ul className='list-group'>

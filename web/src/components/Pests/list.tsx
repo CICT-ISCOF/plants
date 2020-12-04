@@ -69,7 +69,7 @@ export default class List extends Component<RouteComponentProps, State> {
 					{this.state.pests.length > 0 ? (
 						this.state.pests.map((pest, index) => (
 							<div
-								className='col-sm-12 col-md-6 col-lg-4 col-xl-3'
+								className='col-sm-12 col-md-6'
 								data-id={pest.id}
 								key={index}
 							>
@@ -83,6 +83,9 @@ export default class List extends Component<RouteComponentProps, State> {
 										<h3 className='card-title'>
 											{pest.name}
 										</h3>
+										<p className='card-text'>
+											{pest.description}
+										</p>
 										<div className='p-4'>
 											<h6>Affected Plants</h6>
 											<ul className='list-group'>
