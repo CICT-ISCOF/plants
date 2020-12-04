@@ -93,12 +93,16 @@ export default class List extends Component<RouteComponentProps, State> {
 														);
 														if (plant) {
 															return (
-																<li>
+																<li className='list-group-item'>
 																	{plant.name}
 																</li>
 															);
 														}
-														return <li>N\A</li>;
+														return (
+															<li className='list-group-item'>
+																N\A
+															</li>
+														);
 													}
 												)}
 											</ul>

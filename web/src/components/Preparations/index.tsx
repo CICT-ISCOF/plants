@@ -3,7 +3,7 @@ import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 import Form from './form';
 import List from './list';
 
-export default class Tips extends Component<RouteComponentProps> {
+export default class Preparations extends Component<RouteComponentProps> {
 	path(url: string) {
 		return `${this.props.match.path}${url}`;
 	}

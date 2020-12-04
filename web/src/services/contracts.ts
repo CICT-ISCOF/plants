@@ -30,6 +30,7 @@ export interface Plant extends Model {
 	name: string;
 	category_id: string;
 	photo_url: string;
+	month: string;
 }
 
 export interface Pest extends Model {
@@ -43,4 +44,11 @@ export interface Disease extends Model {
 	symptoms: Array<string>;
 	affected_plant_ids: Array<string>;
 	photo_url: string;
+}
+
+export interface Preparation extends Model {
+	title: string;
+	steps: Array<string>;
+	type: string;
+	plant_id: string;
 }

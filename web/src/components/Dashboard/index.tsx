@@ -6,8 +6,8 @@ import Categories from '../Categories';
 import Diseases from '../Diseases';
 import Pests from '../Pests';
 import Plants from '../Plants';
+import Preparations from '../Preparations';
 import Tips from '../Tips';
-import Footer from './footer';
 import Navbar from './navbar';
 import Sidebar from './sidebar';
 
@@ -60,9 +60,12 @@ export default class Dashboard extends Component<RouteComponentProps> {
 								path={this.path(routes.DISEASES)}
 								component={Diseases}
 							/>
+							<Route
+								path={this.path(routes.PREPARATIONS)}
+								component={Preparations}
+							/>
 						</Switch>
 					</div>
-					{/* <Footer /> */}
 				</div>
 			</div>
 		);

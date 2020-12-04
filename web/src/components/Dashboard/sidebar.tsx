@@ -54,6 +54,12 @@ export default class Sidebar extends Component<RouteComponentProps> {
 								<p>Tips</p>
 							</Link>
 						</li>
+						<li>
+							<Link to={this.path(routes.PREPARATIONS)}>
+								<i className='nc-icon nc-basket'></i>
+								<p>Preparations</p>
+							</Link>
+						</li>
 					</ul>
 				</div>
 			</div>

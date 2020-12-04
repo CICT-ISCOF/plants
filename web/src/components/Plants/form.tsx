@@ -12,6 +12,7 @@ type State = {
 	processing: boolean;
 	category_id: string;
 	categories: Array<Category>;
+	month: string;
 };
 
 type Params = {
@@ -35,6 +36,7 @@ export default class Form extends Component<
 			photo_url: 'https://via.placeholder.com/800x200',
 			processing: false,
 			category_id: '',
+			month: 'January',
 			categories: [],
 		};
 	}
@@ -100,6 +102,7 @@ export default class Form extends Component<
 				name: this.state.name,
 				photo_url: this.state.photo_url,
 				category_id: this.state.category_id,
+				month: this.state.month,
 			},
 			'plants'
 		).save();
@@ -175,6 +178,42 @@ export default class Form extends Component<
 									key={index}
 								>
 									{category.title}
+								</option>
+							))}
+						</select>
+					</div>
+					<div className='form-group'>
+						<label htmlFor='month'>Month:</label>
+						<select
+							name='month'
+							id='month'
+							className={`form-control form-control-sm ${
+								this.state.processing ? 'disabled' : ''
+							}`}
+							disabled={this.state.processing}
+							onChange={(e) => {
+								e.preventDefault();
+								this.setState({
+									month: e.target.value,
+								});
+							}}
+						>
+							{[
+								'January',
+								'February',
+								'March',
+								'April',
+								'May',
+								'June',
+								'July',
+								'August',
+								'September',
+								'October',
+								'November',
+								'December',
+							].map((month, index) => (
+								<option value={month} key={index}>
+									{month}
 								</option>
 							))}
 						</select>

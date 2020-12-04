@@ -164,7 +164,10 @@ export default class List extends Component<RouteComponentProps, State> {
 									</div>
 									{tip.items.length > 0
 										? tip.items.map((item, index) => (
-												<div className='card'>
+												<div
+													className='card'
+													key={index}
+												>
 													<div className='card-body'>
 														<img
 															src={item.photo_url}
@@ -176,9 +179,9 @@ export default class List extends Component<RouteComponentProps, State> {
 															}}
 														/>
 														<h4>{item.title}</h4>
-														<div className='card-text'>
+														<p className='card-text'>
 															{item.description}
-														</div>
+														</p>
 													</div>
 												</div>
 										  ))

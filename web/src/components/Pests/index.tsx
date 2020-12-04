@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-import { Link, Route, RouteComponentProps, Switch } from 'react-router-dom';
-import routes from '../../routes';
+import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 import Form from './form';
 import List from './list';
 

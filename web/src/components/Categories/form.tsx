@@ -1,6 +1,5 @@
 import React, { Component, createRef } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import firebase from 'firebase';
 import 'firebase/firestore';
 import { Category } from '../../services/contracts';
 import toastr from 'toastr';

@@ -4,7 +4,6 @@ import firebase from 'firebase';
 import 'firebase/firestore';
 import { Tip, TipItem } from '../../services/contracts';
 import toastr from 'toastr';
-import { create } from 'domain';
 
 type State = {
 	id: string;

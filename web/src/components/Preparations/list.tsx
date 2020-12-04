@@ -1,35 +1,38 @@
 import React, { Component } from 'react';
-import { Category } from '../../services/contracts';
+import { Plant, Preparation } from '../../services/contracts';
 
 import { Link, RouteComponentProps } from 'react-router-dom';
-import db from '../../firebase/firestore';
 import state from '../../services/state';
 import toastr from 'toastr';
+import Model from '../../services/model';
 
 type State = {
-	categories: Array<Category>;
+	preparations: Array<Preparation>;
+	plants: Array<Plant>;
 };
 
 export default class List extends Component<RouteComponentProps, State> {
+	preparationService = new Model<Preparation>(undefined, 'preparations');
+	plantService = new Model<Plant>(undefined, 'plants');
+
 	constructor(props: RouteComponentProps) {
 		super(props);
 		this.state = {
-			categories: [],
+			preparations: [],
+			plants: [],
 		};
 	}
 
 	componentDidMount() {
-		const collection = db.collection('categories');
-		collection.onSnapshot((snapshot) => {
-			const categories: Array<Category> = [];
-			snapshot.forEach((document) =>
-				categories.push({
-					...(document.data() as Category),
-					id: document.id,
-				})
-			);
-			this.setState({ categories });
-		});
+		this.preparationService.get((preparations) =>
+			this.setState({ preparations })
+		);
+		this.plantService.get((plants) => this.setState({ plants }));
+	}
+
+	findPlant(id: string) {
+		const plant = this.state.plants.find((plant) => plant.id === id);
+		return plant ? plant.name : 'N\\A';
 	}
 
 	path(url: string) {
@@ -37,25 +40,16 @@ export default class List extends Component<RouteComponentProps, State> {
 	}
 
 	remove(index: number) {
-		const category = this.state.categories[index];
-		const modalID = `#deleteCategoryModal${category.id}`;
+		const preparation = this.state.preparations[index];
+		const modalID = `#deletePreparationModal${preparation.id}`;
 		const modal = $(modalID) as any;
 		modal.on('hidden.bs.modal', async () => {
-			const document = db.collection('categories').doc(category.id);
-			db.collection('plants')
-				.where('category_id', '==', category.id)
-				.get()
-				.then((plants) => {
-					plants.forEach((plant) =>
-						db.collection('plants').doc(plant.id).delete()
-					);
-				});
 			try {
-				await document.delete();
-				toastr.success('Category deleted successfully.');
+				await this.preparationService.delete(preparation.id as string);
+				toastr.success('Preparation deleted successfully.');
 			} catch (error) {
 				console.log(error);
-				toastr.error('Unable to delete category.');
+				toastr.error('Unable to delete Preparation.');
 			}
 		});
 		modal.modal('hide');
@@ -75,28 +69,44 @@ export default class List extends Component<RouteComponentProps, State> {
 					) : null}
 				</div>
 				<div className='row'>
-					{this.state.categories.length > 0 ? (
-						this.state.categories.map((category, index) => (
+					{this.state.preparations.length > 0 ? (
+						this.state.preparations.map((preparation, index) => (
 							<div
-								className='col-sm-12 col-md-6 col-lg-4 col-xl-3 p-3'
-								data-id={category.id}
+								className='col-sm-12 col-md-6 col-lg-4 p-3'
+								data-id={preparation.id}
 								key={index}
 							>
 								<div className='card'>
-									<img
-										src={category.photo_url}
-										alt={category.title}
-										className='card-img-top'
-									/>
 									<div className='card-body'>
 										<h3 className='card-title'>
-											{category.title}
+											{preparation.title}
 										</h3>
+										<p className='card-text'>
+											Type: {preparation.type}
+										</p>
+										<p className='card-text'>
+											For Plant:{' '}
+											{this.findPlant(
+												preparation.plant_id
+											)}
+										</p>
+										<div className='p-4'>
+											<h6>Steps</h6>
+											<ul className='list-group'>
+												{preparation.steps.map(
+													(step) => (
+														<li className='list-group-item'>
+															{step}
+														</li>
+													)
+												)}
+											</ul>
+										</div>
 										{state.has('user') ? (
 											<Link
 												className='btn btn-info btn-sm'
 												to={this.path(
-													`${category.id}/edit`
+													`${preparation.id}/edit`
 												)}
 											>
 												Edit
@@ -106,10 +116,10 @@ export default class List extends Component<RouteComponentProps, State> {
 											<a
 												className='btn btn-danger btn-sm'
 												href={this.path(
-													`/${category.id}/delete`
+													`/${preparation.id}/delete`
 												)}
 												data-toggle='modal'
-												data-target={`#deleteCategoryModal${category.id}`}
+												data-target={`#deletePreparationModal${preparation.id}`}
 											>
 												Delete
 											</a>
@@ -117,10 +127,10 @@ export default class List extends Component<RouteComponentProps, State> {
 										{state.has('user') ? (
 											<div
 												className='modal fade'
-												id={`deleteCategoryModal${category.id}`}
+												id={`deletePreparationModal${preparation.id}`}
 												tabIndex={-1}
 												role='dialog'
-												aria-labelledby={`deleteCategoryModalLabel${category.id}`}
+												aria-labelledby={`deletePreparationModalLabel${preparation.id}`}
 												aria-hidden='true'
 											>
 												<div
@@ -131,9 +141,10 @@ export default class List extends Component<RouteComponentProps, State> {
 														<div className='modal-header'>
 															<h5
 																className='modal-title'
-																id={`deleteCategoryModalLabel${category.id}`}
+																id={`deletePreparationModalLabel${preparation.id}`}
 															>
-																Delete Category
+																Delete
+																Preparation
 															</h5>
 															<button
 																type='button'
@@ -149,7 +160,7 @@ export default class List extends Component<RouteComponentProps, State> {
 														<div className='modal-body'>
 															Are you sure you
 															want to delete{' '}
-															{category.title}?
+															{preparation.title}?
 														</div>
 														<div className='modal-footer'>
 															<button

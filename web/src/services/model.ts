@@ -34,7 +34,7 @@ export default class Model<T extends ModelContract> {
 	}
 
 	create(data: T) {
-		toastr.info('Creating new data to server.');
+		toastr.info('Sending new data to server.');
 		return this.collection.add({
 			...data,
 			created_at: firebase.firestore.FieldValue.serverTimestamp(),
@@ -50,20 +50,44 @@ export default class Model<T extends ModelContract> {
 		});
 	}
 
-	get(callback: (data: Array<T>) => void, onError?: (error: any) => void) {
-		this.collection.onSnapshot(
-			(snapshot) => {
-				const data: Array<T> = [];
-				snapshot.forEach((document) =>
-					data.push({
-						...(document.data() as T),
-						id: document.id,
-					})
-				);
-				callback(data);
-			},
-			(error) => (onError ? onError(error) : null)
-		);
+	getRef() {
+		return this.collection;
+	}
+
+	get(
+		callback: (data: Array<T>) => void,
+		onError?: (error: any) => void,
+		build?: (
+			collection: firebase.firestore.CollectionReference<firebase.firestore.DocumentData>
+		) => any
+	) {
+		return build
+			? build(this.collection).onSnapshot(
+					(snapshot: Array<any>) => {
+						const data: Array<T> = [];
+						snapshot.forEach((document) =>
+							data.push({
+								...(document.data() as T),
+								id: document.id,
+							})
+						);
+						callback(data);
+					},
+					(error: Error) => (onError ? onError(error) : null)
+			  )
+			: this.collection.onSnapshot(
+					(snapshot) => {
+						const data: Array<T> = [];
+						snapshot.forEach((document) =>
+							data.push({
+								...(document.data() as T),
+								id: document.id,
+							})
+						);
+						callback(data);
+					},
+					(error) => (onError ? onError(error) : null)
+			  );
 	}
 
 	async find(id: string): Promise<T> {

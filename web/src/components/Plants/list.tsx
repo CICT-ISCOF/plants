@@ -11,6 +11,7 @@ type State = {
 	categories: {
 		[id: string]: Category;
 	};
+	sort: 'None' | 'Month' | 'Newest' | 'Oldest';
 };
 
 export default class List extends Component<RouteComponentProps, State> {
@@ -21,6 +22,7 @@ export default class List extends Component<RouteComponentProps, State> {
 		this.state = {
 			plants: [],
 			categories: {},
+			sort: 'None',
 		};
 	}
 
@@ -97,6 +99,9 @@ export default class List extends Component<RouteComponentProps, State> {
 										<p className='card-text'>
 											Category:{' '}
 											{this.getCategoryName(plant)}
+										</p>
+										<p className='card-text'>
+											Month: {plant.month}
 										</p>
 										{state.has('user') ? (
 											<Link
