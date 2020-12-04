@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { Category, Plant } from '../../services/contracts';
 
 import { Link, RouteComponentProps } from 'react-router-dom';
-import db from '../../firebase/firestore';
 import state from '../../services/state';
 import toastr from 'toastr';
 import Model from '../../services/model';
@@ -47,9 +46,8 @@ export default class List extends Component<RouteComponentProps, State> {
 		const modalID = `#deletePlantModal${plant.id}`;
 		const modal = $(modalID) as any;
 		modal.on('hidden.bs.modal', async () => {
-			const document = db.collection('plants').doc(plant.id);
 			try {
-				await document.delete();
+				await this.plantService.delete(plant.id as string);
 				toastr.success('Plant deleted successfully.');
 			} catch (error) {
 				console.log(error);
@@ -60,7 +58,9 @@ export default class List extends Component<RouteComponentProps, State> {
 	}
 
 	getCategoryName(plant: Plant) {
-		return this.state.categories[plant.category_id].title;
+		return plant.category_id in this.state.categories
+			? this.state.categories[plant.category_id].title
+			: 'N\\A';
 	}
 
 	render() {

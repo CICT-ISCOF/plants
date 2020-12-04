@@ -3,6 +3,7 @@ import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 import routes from '../../routes';
 import state from '../../services/state';
 import Categories from '../Categories';
+import Diseases from '../Diseases';
 import Pests from '../Pests';
 import Plants from '../Plants';
 import Tips from '../Tips';
@@ -54,6 +55,10 @@ export default class Dashboard extends Component<RouteComponentProps> {
 							<Route
 								path={this.path(routes.PESTS)}
 								component={Pests}
+							/>
+							<Route
+								path={this.path(routes.DISEASES)}
+								component={Diseases}
 							/>
 						</Switch>
 					</div>

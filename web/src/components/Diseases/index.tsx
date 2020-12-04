@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
-import { Route, RouteComponentProps, Switch } from 'react-router-dom';
+import { Link, Route, RouteComponentProps, Switch } from 'react-router-dom';
+import routes from '../../routes';
 import Form from './form';
 import List from './list';
 
-export default class Categories extends Component<RouteComponentProps> {
+export default class Diseases extends Component<RouteComponentProps> {
 	path(url: string) {
 		return `${this.props.match.path}${url}`;
 	}

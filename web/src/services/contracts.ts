@@ -37,3 +37,10 @@ export interface Pest extends Model {
 	affected_plant_ids: Array<string>;
 	photo_url: string;
 }
+
+export interface Disease extends Model {
+	title: string;
+	symptoms: Array<string>;
+	affected_plant_ids: Array<string>;
+	photo_url: string;
+}

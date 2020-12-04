@@ -6,6 +6,7 @@ const routes = {
 	PLANTS: '/plants',
 	LOGIN: '/',
 	PESTS: '/pests',
+	DISEASES: '/diseases',
 };
 
 export default routes;

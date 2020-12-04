@@ -1,56 +1,55 @@
 import React, { Component } from 'react';
-import { Tip } from '../../services/contracts';
+import { Disease, Plant } from '../../services/contracts';
 
 import { Link, RouteComponentProps } from 'react-router-dom';
-import db from '../../firebase/firestore';
 import state from '../../services/state';
 import toastr from 'toastr';
+import Model from '../../services/model';
 
 type State = {
-	tips: Array<Tip>;
+	plants: Array<Plant>;
+	diseases: Array<Disease>;
 };
 
 export default class List extends Component<RouteComponentProps, State> {
+	diseaseService = new Model<Disease>(undefined, 'diseases');
+	plantService = new Model<Plant>(undefined, 'plants');
+
 	constructor(props: RouteComponentProps) {
 		super(props);
 		this.state = {
-			tips: [],
+			diseases: [],
+			plants: [],
 		};
 	}
 
 	componentDidMount() {
-		const collection = db.collection('tips');
-		collection.onSnapshot((snapshot) => {
-			const tips: Array<Tip> = [];
-			snapshot.forEach((document) =>
-				tips.push({
-					...(document.data() as Tip),
-					id: document.id,
-				})
-			);
-			this.setState({ tips });
-		});
+		this.plantService.get((plants) => this.setState({ plants }));
+		this.diseaseService.get((diseases) => this.setState({ diseases }));
 	}
 
-	remove(index: number) {
-		const tip = this.state.tips[index];
-		const modalID = `#deleteTipModal${tip.id}`;
-		const modal = $(modalID) as any;
-		modal.on('hidden.bs.modal', async () => {
-			const document = db.collection('tips').doc(tip.id);
-			try {
-				await document.delete();
-				toastr.success('Tip deleted successfully.');
-			} catch (error) {
-				console.log(error);
-				toastr.error('Unable to delete tip.');
-			}
-		});
-		modal.modal('hide');
+	findPlant(id: string) {
+		return this.state.plants.find((plant) => plant.id === id);
 	}
 
 	path(url: string) {
 		return `${this.props.match.path}${url}`;
+	}
+
+	remove(index: number) {
+		const disease = this.state.diseases[index];
+		const modalID = `#deleteDiseaseModal${disease.id}`;
+		const modal = $(modalID) as any;
+		modal.on('hidden.bs.modal', async () => {
+			try {
+				await this.diseaseService.delete(disease.id as string);
+				toastr.success('Disease deleted successfully.');
+			} catch (error) {
+				console.log(error);
+				toastr.error('Unable to delete Disease.');
+			}
+		});
+		modal.modal('hide');
 	}
 
 	render() {
@@ -67,32 +66,71 @@ export default class List extends Component<RouteComponentProps, State> {
 					) : null}
 				</div>
 				<div className='row'>
-					{this.state.tips.length > 0 ? (
-						this.state.tips.map((tip, index) => (
+					{this.state.diseases.length > 0 ? (
+						this.state.diseases.map((disease, index) => (
 							<div
-								className='col-sm-12 p-3'
-								data-id={tip.id}
+								className='col-sm-12 col-md-6 col-lg-4 p-3'
+								data-id={disease.id}
 								key={index}
 							>
-								<div className='border rounded shadow p-3'>
-									<h3 className='mb-0'>{tip.title}</h3>
-									<div className='d-flex'>
+								<div className='card'>
+									<img
+										src={disease.photo_url}
+										alt={disease.title}
+										className='card-img-top'
+									/>
+									<div className='card-body'>
+										<h3 className='card-title'>
+											{disease.title}
+										</h3>
+										<div className='p-4'>
+											<h6>Symptoms</h6>
+											<ul className='list-group'>
+												{disease.symptoms.map(
+													(symptom) => (
+														<li>{symptom}</li>
+													)
+												)}
+											</ul>
+										</div>
+										<div className='p-4'>
+											<h6>Affected Plants</h6>
+											<ul className='list-group'>
+												{disease.affected_plant_ids.map(
+													(id) => {
+														const plant = this.findPlant(
+															id
+														);
+														if (plant) {
+															return (
+																<li>
+																	{plant.name}
+																</li>
+															);
+														}
+														return <li>N\A</li>;
+													}
+												)}
+											</ul>
+										</div>
 										{state.has('user') ? (
 											<Link
-												className='btn btn-info btn-sm mx-1'
-												to={this.path(`${tip.id}/edit`)}
+												className='btn btn-info btn-sm'
+												to={this.path(
+													`${disease.id}/edit`
+												)}
 											>
 												Edit
 											</Link>
 										) : null}
 										{state.has('user') ? (
 											<a
-												className='btn btn-danger btn-sm mx-1'
+												className='btn btn-danger btn-sm'
 												href={this.path(
-													`/${tip.id}/delete`
+													`/${disease.id}/delete`
 												)}
 												data-toggle='modal'
-												data-target={`#deleteTipModal${tip.id}`}
+												data-target={`#deleteDiseaseModal${disease.id}`}
 											>
 												Delete
 											</a>
@@ -100,10 +138,10 @@ export default class List extends Component<RouteComponentProps, State> {
 										{state.has('user') ? (
 											<div
 												className='modal fade'
-												id={`deleteTipModal${tip.id}`}
+												id={`deleteDiseaseModal${disease.id}`}
 												tabIndex={-1}
 												role='dialog'
-												aria-labelledby={`deleteTipModalLabel${tip.id}`}
+												aria-labelledby={`deleteDiseaseModalLabel${disease.id}`}
 												aria-hidden='true'
 											>
 												<div
@@ -114,9 +152,9 @@ export default class List extends Component<RouteComponentProps, State> {
 														<div className='modal-header'>
 															<h5
 																className='modal-title'
-																id={`deleteCategoryModalLabel${tip.id}`}
+																id={`deleteDiseaseModalLabel${disease.id}`}
 															>
-																Delete Tip
+																Delete Disease
 															</h5>
 															<button
 																type='button'
@@ -132,7 +170,7 @@ export default class List extends Component<RouteComponentProps, State> {
 														<div className='modal-body'>
 															Are you sure you
 															want to delete{' '}
-															{tip.title}?
+															{disease.title}?
 														</div>
 														<div className='modal-footer'>
 															<button
@@ -162,27 +200,6 @@ export default class List extends Component<RouteComponentProps, State> {
 											</div>
 										) : null}
 									</div>
-									{tip.items.length > 0
-										? tip.items.map((item, index) => (
-												<div className='card'>
-													<div className='card-body'>
-														<img
-															src={item.photo_url}
-															alt=''
-															className='card-img-top'
-															style={{
-																maxHeight:
-																	'200px',
-															}}
-														/>
-														<h4>{item.title}</h4>
-														<div className='card-text'>
-															{item.description}
-														</div>
-													</div>
-												</div>
-										  ))
-										: null}
 								</div>
 							</div>
 						))

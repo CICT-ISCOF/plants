@@ -21,7 +21,7 @@ export default class Navbar extends Component<
 	logout() {
 		firebase.auth().signOut();
 		state.remove('user').remove('id');
-		this.props.history.goBack();
+		window.location.reload();
 	}
 
 	render() {

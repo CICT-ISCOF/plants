@@ -1,17 +1,18 @@
 import React, { Component, createRef } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { Pest, Plant } from '../../services/contracts';
+import { Disease, Plant } from '../../services/contracts';
 import toastr from 'toastr';
 import Model from '../../services/model';
 
 type State = {
 	id?: string;
-	name: string;
+	title: string;
+	photo_url: string;
 	affected_plant_ids: Array<string>;
-	plants: Array<Plant>;
 	mode: 'Add' | 'Edit';
 	processing: boolean;
-	photo_url: string;
+	plants: Array<Plant>;
+	symptoms: Array<string>;
 };
 
 type Params = {
@@ -22,20 +23,21 @@ export default class Form extends Component<
 	RouteComponentProps<Params>,
 	State
 > {
-	plantService = new Model<Plant>(undefined, 'plants');
 	fileInputRef = createRef<HTMLInputElement>();
 	fileReader = new FileReader();
+	plantService = new Model<Plant>(undefined, 'plants');
 
 	constructor(props: RouteComponentProps<Params>) {
 		super(props);
 		this.state = {
 			id: '',
 			mode: 'Add',
-			name: '',
+			title: '',
 			affected_plant_ids: [],
-			plants: [],
-			processing: false,
 			photo_url: 'https://via.placeholder.com/800x200',
+			processing: false,
+			plants: [],
+			symptoms: [''],
 		};
 	}
 
@@ -44,14 +46,16 @@ export default class Form extends Component<
 		const fragments = this.props.match.path.split('/');
 		if (fragments.includes('edit')) {
 			const id = this.props.match.params.id;
-			new Model<Pest>(undefined, 'pests').find(id).then((document) => {
-				this.setState({
-					mode: 'Edit',
-					...document,
-					processing: false,
-					plants: this.state.plants,
+			new Model<Disease>(undefined, 'diseases')
+				.find(id)
+				.then((document) => {
+					this.setState({
+						mode: 'Edit',
+						...document,
+						processing: false,
+						plants: this.state.plants,
+					});
 				});
-			});
 		}
 		this.fileReader.onload = (event) => {
 			this.setState({
@@ -78,8 +82,8 @@ export default class Form extends Component<
 			processing: true,
 		});
 		this.request()
-			.then(() => toastr.success('Pest saved successfully.'))
-			.catch(() => toastr.error('Unable to save Pest.'))
+			.then(() => toastr.success('Disease saved successfully.'))
+			.catch(() => toastr.error('Unable to save Disease.'))
 			.finally(() =>
 				this.setState({
 					processing: false,
@@ -88,15 +92,32 @@ export default class Form extends Component<
 	}
 
 	request() {
-		return new Model<Pest>(
+		return new Model<Disease>(
 			{
 				id: this.state.id,
-				name: this.state.name,
+				title: this.state.title,
 				photo_url: this.state.photo_url,
 				affected_plant_ids: this.state.affected_plant_ids,
+				symptoms: this.state.symptoms,
 			},
-			'pests'
+			'diseases'
 		).save();
+	}
+
+	handleAffectedPlantInput(plant: Plant) {
+		const id = plant.id as string;
+		const ids = this.state.affected_plant_ids;
+		if (ids.includes(id)) {
+			const index = ids.indexOf(id);
+			ids.splice(index, 1);
+		} else {
+			ids.push(id);
+		}
+		this.setState({ affected_plant_ids: ids });
+	}
+
+	getAffectedPlantInputState(plant: Plant) {
+		return this.state.affected_plant_ids.includes(plant.id as string);
 	}
 
 	render() {
@@ -128,24 +149,105 @@ export default class Form extends Component<
 						/>
 					</div>
 					<div className='form-group'>
-						<label htmlFor='name'>Name:</label>
+						<label htmlFor='title'>Title:</label>
 						<input
 							type='text'
-							name='name'
-							id='name'
-							placeholder='Name'
+							name='title'
+							id='title'
+							placeholder='Title'
 							className={`form-control form-control-sm ${
 								this.state.processing ? 'disabled' : ''
 							}`}
-							value={this.state.name}
+							value={this.state.title}
 							onChange={(e) => {
 								e.preventDefault();
 								this.setState({
-									name: e.target.value,
+									title: e.target.value,
 								});
 							}}
 							disabled={this.state.processing}
 						/>
+					</div>
+					<div className='form-group'>
+						<label htmlFor='symptoms'>Symptoms:</label>
+						<div className='p-4'>
+							<table className='table'>
+								<tbody>
+									<tr>
+										<td>
+											<button
+												className='btn btn-info btn-sm'
+												onClick={(e) => {
+													e.preventDefault();
+													const symptoms = this.state
+														.symptoms;
+													symptoms.push('');
+													this.setState({ symptoms });
+												}}
+											>
+												Add
+											</button>
+										</td>
+									</tr>
+									{this.state.symptoms.map(
+										(symptom, index) => (
+											<tr>
+												<td>
+													<input
+														type='text'
+														name={`symptom-${index}`}
+														id={`symptom-${index}`}
+														placeholder={`Symptom ${
+															index + 1
+														}`}
+														className={`form-control form-control-sm ${
+															this.state
+																.processing
+																? 'disabled'
+																: ''
+														}`}
+														value={symptom}
+														onChange={(e) => {
+															e.preventDefault();
+															const symptoms = this
+																.state.symptoms;
+															symptoms[index] =
+																e.target.value;
+															this.setState({
+																symptoms,
+															});
+														}}
+														disabled={
+															this.state
+																.processing
+														}
+													/>
+												</td>
+												<td>
+													<button
+														className='btn btn-dark btn-sm'
+														onClick={(e) => {
+															e.preventDefault();
+															const symptoms = this
+																.state.symptoms;
+															symptoms.splice(
+																index,
+																1
+															);
+															this.setState({
+																symptoms,
+															});
+														}}
+													>
+														Remove
+													</button>
+												</td>
+											</tr>
+										)
+									)}
+								</tbody>
+							</table>
+						</div>
 					</div>
 					<div className='form-group'>
 						<label htmlFor='affected_plant_ids'>
@@ -159,31 +261,16 @@ export default class Form extends Component<
 											type='checkbox'
 											className='custom-control-input'
 											id={`plant-${plant.id}`}
-											checked={this.state.affected_plant_ids.includes(
-												plant.id as string
+											checked={this.getAffectedPlantInputState(
+												plant
 											)}
 											onChange={(e) => {
 												// e.preventDefault();
-												const ids = this.state
-													.affected_plant_ids;
-												if (
-													this.state.affected_plant_ids.includes(
-														plant.id as string
-													)
-												) {
-													const index = ids.indexOf(
-														plant.id as string
-													);
-													ids.splice(index, 1);
-												} else {
-													ids.push(
-														plant.id as string
-													);
-												}
-												this.setState({
-													affected_plant_ids: ids,
-												});
+												this.handleAffectedPlantInput(
+													plant
+												);
 											}}
+											value={plant.id as string}
 										/>
 										<label
 											className='custom-control-label'

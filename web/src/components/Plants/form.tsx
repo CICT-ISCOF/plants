@@ -187,7 +187,7 @@ export default class Form extends Component<
 							}`}
 							disabled={this.state.processing}
 						>
-							Save
+							{this.state.processing ? 'Saving...' : 'Save'}
 						</button>
 					</div>
 				</form>
