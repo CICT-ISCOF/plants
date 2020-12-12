@@ -1,6 +1,6 @@
 import React, { Component, createRef } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { Category, Plant } from '../../services/contracts';
+import { Category, Plant, PlantCompanion } from '../../services/contracts';
 import toastr from 'toastr';
 import Model from '../../services/model';
 
@@ -12,11 +12,20 @@ type State = {
 	processing: boolean;
 	category_id: string;
 	categories: Array<Category>;
-	month: string;
+	months: Array<string>;
+	plants: Array<Plant>;
+	companions: Array<PlantCompanion>;
+	description: string;
+	layouts: Array<string>;
 };
 
 type Params = {
 	id: string;
+};
+
+type FileRef = {
+	ref: React.RefObject<HTMLInputElement>;
+	reader: FileReader;
 };
 
 export default class Form extends Component<
@@ -24,8 +33,11 @@ export default class Form extends Component<
 	State
 > {
 	categoryService = new Model<Category>(undefined, 'categories');
+	plantService = new Model<Plant>(undefined, 'plants');
 	fileInputRef = createRef<HTMLInputElement>();
 	fileReader = new FileReader();
+
+	layoutInputRefs: Array<FileRef> = [];
 
 	constructor(props: RouteComponentProps<Params>) {
 		super(props);
@@ -36,8 +48,12 @@ export default class Form extends Component<
 			photo_url: 'https://via.placeholder.com/800x200',
 			processing: false,
 			category_id: '',
-			month: 'January',
+			months: ['January'],
 			categories: [],
+			plants: [],
+			companions: [],
+			description: '',
+			layouts: [],
 		};
 	}
 
@@ -49,15 +65,39 @@ export default class Form extends Component<
 					categories.length > 0 ? (categories[0].id as string) : '',
 			});
 		});
+		this.plantService.once().then((plants) => {
+			this.setState({ plants });
+			if (plants.length > 0) {
+				const companions = this.state.companions;
+				companions.push({
+					type: 'Good',
+					plant_id: plants[0].id as string,
+				});
+				this.setState({ companions });
+			}
+		});
 		const fragments = this.props.match.path.split('/');
 		if (fragments.includes('edit')) {
 			const id = this.props.match.params.id;
 			new Model<Plant>(undefined, 'plants').find(id).then((document) => {
+				document.layouts.forEach((_url, index) => {
+					const ref = {
+						ref: createRef<HTMLInputElement>(),
+						reader: new FileReader(),
+					};
+					ref.reader.onload = (event) => {
+						const layouts = this.state.layouts;
+						layouts.splice(index, 1, String(event.target?.result));
+						this.setState({ layouts });
+					};
+					this.layoutInputRefs.push(ref);
+				});
 				this.setState({
 					mode: 'Edit',
 					...document,
 					processing: false,
 					categories: this.state.categories,
+					plants: this.state.plants,
 				});
 			});
 		}
@@ -102,7 +142,10 @@ export default class Form extends Component<
 				name: this.state.name,
 				photo_url: this.state.photo_url,
 				category_id: this.state.category_id,
-				month: this.state.month,
+				months: this.state.months,
+				companions: this.state.companions,
+				description: this.state.description,
+				layouts: this.state.layouts,
 			},
 			'plants'
 		).save();
@@ -157,6 +200,25 @@ export default class Form extends Component<
 						/>
 					</div>
 					<div className='form-group'>
+						<label htmlFor='description'>Description:</label>
+						<textarea
+							name='description'
+							id='description'
+							placeholder='Description'
+							className={`form-control form-control-sm ${
+								this.state.processing ? 'disabled' : ''
+							}`}
+							disabled={this.state.processing}
+							value={this.state.description}
+							onChange={(e) => {
+								e.preventDefault();
+								this.setState({
+									description: e.target.value,
+								});
+							}}
+						></textarea>
+					</div>
+					<div className='form-group'>
 						<label htmlFor='category_id'>Category:</label>
 						<select
 							name='category_id'
@@ -183,21 +245,8 @@ export default class Form extends Component<
 						</select>
 					</div>
 					<div className='form-group'>
-						<label htmlFor='month'>Month:</label>
-						<select
-							name='month'
-							id='month'
-							className={`form-control form-control-sm ${
-								this.state.processing ? 'disabled' : ''
-							}`}
-							disabled={this.state.processing}
-							onChange={(e) => {
-								e.preventDefault();
-								this.setState({
-									month: e.target.value,
-								});
-							}}
-						>
+						<label htmlFor='month'>Months:</label>
+						<div className='row'>
 							{[
 								'January',
 								'February',
@@ -212,11 +261,279 @@ export default class Form extends Component<
 								'November',
 								'December',
 							].map((month, index) => (
-								<option value={month} key={index}>
-									{month}
-								</option>
+								<div className='col-12 col-md-4 col-lg-3'>
+									<div className='custom-control custom-checkbox'>
+										<input
+											type='checkbox'
+											className='custom-control-input'
+											id={`month-${index}`}
+											checked={this.state.months.includes(
+												month
+											)}
+											onChange={(e) => {
+												const months = this.state
+													.months;
+												if (months.includes(month)) {
+													months.splice(index, 1);
+												} else {
+													months.push(month);
+												}
+												this.setState({ months });
+											}}
+										/>
+										<label
+											className='custom-control-label'
+											htmlFor={`month-${index}`}
+										>
+											{month}
+										</label>
+									</div>
+								</div>
 							))}
-						</select>
+						</div>
+					</div>
+					<div className='form-group'>
+						<label htmlFor='month'>Companions:</label>
+						<table className='table'>
+							<tbody>
+								<tr>
+									<td>
+										<button
+											className='btn btn-info btn-sm'
+											onClick={(e) => {
+												e.preventDefault();
+												if (
+													this.state.plants.length > 0
+												) {
+													const companions = this
+														.state.companions;
+													companions.push({
+														type: 'Good',
+														plant_id: this.state
+															.plants[0]
+															.id as string,
+													});
+													this.setState({
+														companions,
+													});
+												}
+											}}
+										>
+											Add Row
+										</button>
+									</td>
+								</tr>
+								{this.state.companions.map(
+									(companion, index) => (
+										<tr key={index}>
+											<td>
+												<select
+													name={`companion-type-${index}`}
+													id={`companion-type-${index}`}
+													className={`form-control form-control-sm ${
+														this.state.processing
+															? 'disabled'
+															: ''
+													}`}
+													disabled={
+														this.state.processing
+													}
+													value={companion.type}
+													onChange={(e) => {
+														const companions = this
+															.state.companions;
+														companions[index].type =
+															e.target.value;
+														this.setState({
+															companions,
+														});
+													}}
+												>
+													<option value='Good'>
+														Good
+													</option>
+													<option value='Bad'>
+														Bad
+													</option>
+												</select>
+											</td>
+											<td>
+												<select
+													name={`companion-plant-${index}`}
+													id={`companion-plant-${index}`}
+													className={`form-control form-control-sm ${
+														this.state.processing
+															? 'disabled'
+															: ''
+													}`}
+													disabled={
+														this.state.processing
+													}
+													value={companion.plant_id}
+													onChange={(e) => {
+														const companions = this
+															.state.companions;
+														companions[
+															index
+														].plant_id =
+															e.target.value;
+														this.setState({
+															companions,
+														});
+													}}
+												>
+													{this.state.plants
+														.filter(
+															(plant) =>
+																plant.id !==
+																this.state.id
+														)
+														.map((plant, index) => (
+															<option
+																value={plant.id}
+																key={index}
+															>
+																{plant.name}
+															</option>
+														))}
+												</select>
+											</td>
+											<td>
+												<button
+													className='btn btn-danger btn-sm'
+													onClick={(e) => {
+														e.preventDefault();
+														const companions = this
+															.state.companions;
+														companions.splice(
+															index,
+															1
+														);
+														this.setState({
+															companions,
+														});
+													}}
+												>
+													Remove
+												</button>
+											</td>
+										</tr>
+									)
+								)}
+							</tbody>
+						</table>
+					</div>
+					<div className='form-group'>
+						<label htmlFor='layouts'>Layouts:</label>
+						<table className='table'>
+							<tbody>
+								<tr>
+									<td>
+										<button
+											className='btn btn-info btn-sm'
+											onClick={(e) => {
+												e.preventDefault();
+												const layouts = this.state
+													.layouts;
+												const index =
+													layouts.push(
+														'https://via.placeholder.com/200'
+													) - 1;
+
+												const ref = {
+													ref: createRef<HTMLInputElement>(),
+													reader: new FileReader(),
+												};
+
+												ref.reader.onload = (event) => {
+													const layouts = this.state
+														.layouts;
+													layouts.splice(
+														index,
+														1,
+														String(
+															event.target?.result
+														)
+													);
+													this.setState({ layouts });
+												};
+
+												this.layoutInputRefs.push(ref);
+												this.setState({ layouts });
+											}}
+										>
+											Add Row
+										</button>
+									</td>
+								</tr>
+								{this.state.layouts.map((url, index) => (
+									<tr key={index}>
+										<td className='text-center'>
+											<input
+												type='file'
+												name=''
+												id=''
+												ref={
+													this.layoutInputRefs[index]
+														.ref
+												}
+												className='d-none'
+												onChange={(e) => {
+													e.preventDefault();
+													if (
+														e.target.files &&
+														e.target.files.length >
+															0
+													) {
+														const reader = this
+															.layoutInputRefs[
+															index
+														].reader;
+														reader.readAsDataURL(
+															e.target.files[0]
+														);
+													}
+												}}
+											/>
+											<img
+												src={url}
+												alt=''
+												style={{
+													maxHeight: '200px',
+													maxWidth: '200px',
+												}}
+												className='img-fluid rounded my-3 mx-2 text-center clickable'
+												onClick={(e) => {
+													e.preventDefault();
+													const ref = this
+														.layoutInputRefs[index]
+														.ref;
+													ref.current?.click();
+												}}
+											/>
+										</td>
+										<td>
+											<button
+												className='btn btn-danger btn-sm'
+												onClick={(e) => {
+													e.preventDefault();
+													this.layoutInputRefs.splice(
+														index,
+														1
+													);
+													const layouts = this.state
+														.layouts;
+													layouts.splice(index, 1);
+													this.setState({ layouts });
+												}}
+											>
+												Remove
+											</button>
+										</td>
+									</tr>
+								))}
+							</tbody>
+						</table>
 					</div>
 					<div className='form-group'>
 						<button

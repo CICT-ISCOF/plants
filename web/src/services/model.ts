@@ -54,6 +54,18 @@ export default class Model<T extends ModelContract> {
 		return this.collection;
 	}
 
+	async once() {
+		const snapshot = await this.collection.get();
+		const data: Array<T> = [];
+		snapshot.forEach((document) =>
+			data.push({
+				...(document.data() as T),
+				id: document.id,
+			})
+		);
+		return data;
+	}
+
 	get(
 		callback: (data: Array<T>) => void,
 		onError?: (error: any) => void,

@@ -5,6 +5,7 @@ import { Link, RouteComponentProps } from 'react-router-dom';
 import state from '../../services/state';
 import toastr from 'toastr';
 import Model from '../../services/model';
+import { group } from 'console';
 
 type State = {
 	plants: Array<Plant>;
@@ -65,6 +66,30 @@ export default class List extends Component<RouteComponentProps, State> {
 			: 'N\\A';
 	}
 
+	findPlant(id: string, index: number) {
+		const plant = this.state.plants.find((plant) => plant.id === id);
+		const parent = this.state.plants[index];
+		if (!plant) {
+			const companions = parent.companions.filter(
+				(companion) => companion.plant_id !== id
+			);
+			new Model<Plant>(
+				{
+					id: parent.id,
+					name: parent.name,
+					photo_url: parent.photo_url,
+					category_id: parent.category_id,
+					months: parent.months,
+					companions: companions,
+					description: parent.description,
+					layouts: parent.layouts,
+				},
+				'plants'
+			).save();
+		}
+		return plant ? plant.name : 'N\\A';
+	}
+
 	render() {
 		return (
 			<div className='container pt-3'>
@@ -82,7 +107,7 @@ export default class List extends Component<RouteComponentProps, State> {
 					{this.state.plants.length > 0 ? (
 						this.state.plants.map((plant, index) => (
 							<div
-								className='col-sm-12 col-md-6 col-lg-4 col-xl-3 p-3'
+								className='col-12 p-3'
 								data-id={plant.id}
 								key={index}
 							>
@@ -96,13 +121,68 @@ export default class List extends Component<RouteComponentProps, State> {
 										<h3 className='card-title'>
 											{plant.name}
 										</h3>
+										<b className='card-text'>Category:</b>
 										<p className='card-text'>
-											Category:{' '}
 											{this.getCategoryName(plant)}
 										</p>
+										<b className='card-text'>
+											Description:
+										</b>
 										<p className='card-text'>
-											Month: {plant.month}
+											{plant.description}
 										</p>
+										<b className='card-text'>Months:</b>
+										<ul className='mb-3 list-group'>
+											{plant.months.map((month) => (
+												<li className='list-group-item'>
+													{month}
+												</li>
+											))}
+										</ul>
+										<b className='card-text'>Companions:</b>
+										{plant.companions.length === 0 ? (
+											<p className='card-text'>None</p>
+										) : null}
+										<ul className='mb-3 list-group'>
+											{plant.companions
+												.sort((c1, c2) => {
+													return c1.type === c2.type
+														? 0
+														: -1;
+												})
+												.map((companion) => (
+													<li className='list-group-item'>
+														Name:{' '}
+														{this.findPlant(
+															companion.plant_id,
+															index
+														)}
+														<br />
+														Type: {companion.type}
+													</li>
+												))}
+										</ul>
+										<b className='card-text'>Layouts:</b>
+										{plant.layouts.length === 0 ? (
+											<p className='card-text'>None</p>
+										) : null}
+										<div className='my-3 row'>
+											{plant.layouts.map((url, index) => (
+												<div
+													className='col-12 col-md-6 col-lg-4 text-center'
+													key={index}
+												>
+													<img
+														src={url}
+														alt=''
+														className='img-fluid'
+														style={{
+															maxHeight: '200px',
+														}}
+													/>
+												</div>
+											))}
+										</div>
 										{state.has('user') ? (
 											<Link
 												className='btn btn-info btn-sm'

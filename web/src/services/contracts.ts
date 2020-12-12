@@ -26,11 +26,19 @@ export interface TipItem {
 	photo_url: string;
 }
 
+export interface PlantCompanion {
+	type: string;
+	plant_id: string;
+}
+
 export interface Plant extends Model {
 	name: string;
 	category_id: string;
 	photo_url: string;
-	month: string;
+	months: Array<string>;
+	companions: Array<PlantCompanion>;
+	description: string;
+	layouts: Array<string>;
 }
 
 export interface Pest extends Model {

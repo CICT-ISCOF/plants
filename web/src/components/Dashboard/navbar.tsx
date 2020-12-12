@@ -65,7 +65,6 @@ export default class Navbar extends Component<
 										href='/'
 										id='navbarDropdownMenuLink'
 										data-toggle='dropdown'
-										aria-haspopup='true'
 										aria-expanded='false'
 									>
 										<i className='nc-icon nc-circle-10'></i>
@@ -98,7 +97,6 @@ export default class Navbar extends Component<
 										href='/'
 										id='navbarDropdownMenuLink'
 										data-toggle='dropdown'
-										aria-haspopup='true'
 										aria-expanded='false'
 									>
 										<i className='nc-icon nc-tile-56'></i>
