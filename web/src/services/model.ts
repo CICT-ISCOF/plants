@@ -7,8 +7,10 @@ export default class Model<T extends ModelContract> {
 	protected data?: T;
 	protected collectionName: string;
 	protected collection: firebase.firestore.CollectionReference<firebase.firestore.DocumentData>;
+	protected notify = true;
 
-	constructor(data?: T, collectionName?: string) {
+	constructor(data?: T, collectionName?: string, notify = true) {
+		this.notify = notify;
 		this.data = data;
 		this.collectionName = collectionName || '';
 		this.collection = firebase.firestore().collection(this.collectionName);
@@ -34,7 +36,9 @@ export default class Model<T extends ModelContract> {
 	}
 
 	create(data: T) {
-		toastr.info('Sending new data to server.');
+		if (this.notify) {
+			toastr.info('Sending new data to server.');
+		}
 		return this.collection.add({
 			...data,
 			created_at: firebase.firestore.FieldValue.serverTimestamp(),
@@ -43,7 +47,9 @@ export default class Model<T extends ModelContract> {
 	}
 
 	update() {
-		toastr.info('Sending updated data to server.');
+		if (this.notify) {
+			toastr.info('Sending updated data to server.');
+		}
 		return this.collection.doc((this.data as T).id as string).update({
 			...this.getData(),
 			updated_at: firebase.firestore.FieldValue.serverTimestamp(),
@@ -113,7 +119,9 @@ export default class Model<T extends ModelContract> {
 	}
 
 	async delete(id: string) {
-		toastr.info('Deleting data from server.');
+		if (this.notify) {
+			toastr.info('Deleting data from server.');
+		}
 		return await this.collection.doc(id).delete();
 	}
 

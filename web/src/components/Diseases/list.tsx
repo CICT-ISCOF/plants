@@ -28,8 +28,28 @@ export default class List extends Component<RouteComponentProps, State> {
 		this.diseaseService.get((diseases) => this.setState({ diseases }));
 	}
 
-	findPlant(id: string) {
-		return this.state.plants.find((plant) => plant.id === id);
+	findPlant(id: string, index: number) {
+		const plant = this.state.plants.find((plant) => plant.id === id);
+		if (!plant) {
+			const disease = this.state.diseases[index];
+			const ids = disease.affected_plant_ids.filter(
+				(plant_id) => plant_id !== id
+			);
+			new Model<Disease>(
+				{
+					id: disease.id,
+					title: disease.title,
+					symptoms: disease.symptoms,
+					affected_plant_ids: ids,
+					photo_url: disease.photo_url,
+					description: disease.description,
+				},
+				'diseases',
+				false
+			).save();
+			return 'N\\A';
+		}
+		return plant?.name;
 	}
 
 	path(url: string) {
@@ -102,23 +122,14 @@ export default class List extends Component<RouteComponentProps, State> {
 											<h6>Affected Plants</h6>
 											<ul className='list-group'>
 												{disease.affected_plant_ids.map(
-													(id) => {
-														const plant = this.findPlant(
-															id
-														);
-														if (plant) {
-															return (
-																<li className='list-group-item'>
-																	{plant.name}
-																</li>
-															);
-														}
-														return (
-															<li className='list-group-item'>
-																N\A
-															</li>
-														);
-													}
+													(id) => (
+														<li className='list-group-item'>
+															{this.findPlant(
+																id,
+																index
+															)}
+														</li>
+													)
 												)}
 											</ul>
 										</div>

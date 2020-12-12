@@ -15,6 +15,8 @@ export default class List extends Component<RouteComponentProps, State> {
 	plantService = new Model<Plant>(undefined, 'plants');
 	pestService = new Model<Pest>(undefined, 'pests');
 
+	isReorganizing = false;
+
 	constructor(props: RouteComponentProps) {
 		super(props);
 		this.state = {
@@ -24,12 +26,38 @@ export default class List extends Component<RouteComponentProps, State> {
 	}
 
 	componentDidMount() {
-		this.pestService.get((pests) => this.setState({ pests }));
-		this.plantService.get((plants) => this.setState({ plants }));
+		this.plantService.get((plants) =>
+			this.isReorganizing ? null : this.setState({ plants })
+		);
+		this.pestService.get((pests) =>
+			this.isReorganizing ? null : this.setState({ pests })
+		);
 	}
 
-	findPlant(id: string) {
-		return this.state.plants.find((plant) => plant.id === id);
+	findPlant(id: string, index: number) {
+		const plant = this.state.plants.find((plant) => plant.id === id);
+		if (!plant) {
+			this.isReorganizing = true;
+			const pest = this.state.pests[index];
+			const ids = pest.affected_plant_ids.filter(
+				(plant_id) => plant_id !== id
+			);
+			new Model<Pest>(
+				{
+					id: pest.id,
+					name: pest.name,
+					photo_url: pest.photo_url,
+					description: pest.description,
+					affected_plant_ids: ids,
+				},
+				'pests',
+				false
+			)
+				.save()
+				.finally(() => (this.isReorganizing = false));
+			return 'N\\A';
+		}
+		return plant.name;
 	}
 
 	path(url: string) {
@@ -88,25 +116,25 @@ export default class List extends Component<RouteComponentProps, State> {
 										</p>
 										<div className='p-4'>
 											<h6>Affected Plants</h6>
+											{pest.affected_plant_ids.length ===
+											0 ? (
+												<p className='card-text'>
+													None
+												</p>
+											) : null}
 											<ul className='list-group'>
 												{pest.affected_plant_ids.map(
-													(id) => {
-														const plant = this.findPlant(
-															id
-														);
-														if (plant) {
-															return (
-																<li className='list-group-item'>
-																	{plant.name}
-																</li>
-															);
-														}
-														return (
-															<li className='list-group-item'>
-																N\A
-															</li>
-														);
-													}
+													(id, pestIndex) => (
+														<li
+															className='list-group-item'
+															key={pestIndex}
+														>
+															{this.findPlant(
+																id,
+																index
+															)}
+														</li>
+													)
 												)}
 											</ul>
 										</div>

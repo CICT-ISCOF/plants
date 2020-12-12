@@ -5,7 +5,6 @@ import { Link, RouteComponentProps } from 'react-router-dom';
 import state from '../../services/state';
 import toastr from 'toastr';
 import Model from '../../services/model';
-import { group } from 'console';
 
 type State = {
 	plants: Array<Plant>;
@@ -18,6 +17,9 @@ type State = {
 export default class List extends Component<RouteComponentProps, State> {
 	categoryService = new Model<Category>(undefined, 'categories');
 	plantService = new Model<Plant>(undefined, 'plants');
+
+	isReorganizing = false;
+
 	constructor(props: RouteComponentProps) {
 		super(props);
 		this.state = {
@@ -33,10 +35,14 @@ export default class List extends Component<RouteComponentProps, State> {
 			categories.forEach((category) => {
 				data[category.id as string] = category;
 			});
-			this.setState({ categories: data });
+			if (!this.isReorganizing) {
+				this.setState({ categories: data });
+			}
 		});
 		this.plantService.get((plants) => {
-			this.setState({ plants });
+			if (!this.isReorganizing) {
+				this.setState({ plants });
+			}
 		});
 	}
 
@@ -68,8 +74,9 @@ export default class List extends Component<RouteComponentProps, State> {
 
 	findPlant(id: string, index: number) {
 		const plant = this.state.plants.find((plant) => plant.id === id);
-		const parent = this.state.plants[index];
 		if (!plant) {
+			this.isReorganizing = true;
+			const parent = this.state.plants[index];
 			const companions = parent.companions.filter(
 				(companion) => companion.plant_id !== id
 			);
@@ -84,8 +91,11 @@ export default class List extends Component<RouteComponentProps, State> {
 					description: parent.description,
 					layouts: parent.layouts,
 				},
-				'plants'
-			).save();
+				'plants',
+				false
+			)
+				.save()
+				.finally(() => (this.isReorganizing = false));
 		}
 		return plant ? plant.name : 'N\\A';
 	}
