@@ -17,7 +17,8 @@ export default class LayoutIdeas extends Component {
     state = {        
         images:this.props.plant.layouts,
         bad:[],
-        good:[]
+        good:[],
+        show:false
     }
 
     plants:any
@@ -108,6 +109,9 @@ export default class LayoutIdeas extends Component {
                     </View>
 
                     <ScrollView>                        
+                        <TouchableOpacity style={{alignSelf:'center',marginTop:50}} onPress={()=>{this.setState({show:true})}}>
+                            <Text style={{color:theme[themeState].color}}>Show Companions</Text>
+                        </TouchableOpacity>
                         {
                             this.state.images.map((layout)=>{
                                 return(
@@ -123,7 +127,11 @@ export default class LayoutIdeas extends Component {
                     </ScrollView>
                 
 
-                    <View style={styles.container}>
+                    <View style={[styles.container,this.state.show == false ? { display : 'none'} : {}]} >
+                      
+                        <TouchableOpacity style={{alignSelf:'flex-end',margin:20,marginBottom:-50}} onPress={()=>{this.setState({show:false})}}>
+                            <AntDesign  name="closecircle" size={24} color={theme[themeState].color} />
+                        </TouchableOpacity>
                         <Text style={styles.title}>Good Companions</Text>
                         <ScrollView horizontal={true} style={[styles.companions,styles.Good]} showsHorizontalScrollIndicator={false}>
                             {
