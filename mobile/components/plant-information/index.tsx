@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Text, View, Image, TouchableOpacity, FlatList, ScrollView} from 'react-native'
+import { Text, View, Image, TouchableOpacity, FlatList, ScrollView, ActivityIndicator} from 'react-native'
 import { Actions } from 'react-native-router-flux'
 import globalStyles from '../../constants/style'
 import { Entypo } from '@expo/vector-icons'; 
@@ -10,6 +10,7 @@ import Grid from 'react-native-grid-component';
 import firebase from 'firebase'
 import theme from '../../constants/color'
 const themeState = theme.themState
+
 
 export default class PlantInformation extends Component {
 
@@ -29,7 +30,8 @@ export default class PlantInformation extends Component {
 			'December',		
 		],
 		selectedMonth:'January',
-		plants:[]
+		plants:[],
+		isLoading:true
 	}
 
 	plants:any
@@ -47,8 +49,7 @@ export default class PlantInformation extends Component {
 		if(!firebase.apps.length){
 			firebase.initializeApp(firebaseConfig)
 		}	
-		this.plants = firebase.firestore().collection('plants')			
-		this.changeListener()	
+		this.plants = firebase.firestore().collection('plants')	
 		this.selectMonth('January')
 	}
 
@@ -73,6 +74,7 @@ export default class PlantInformation extends Component {
 	}
 
 	async selectMonth(month){
+		this.setState({isLoading:true})
 		this.setState({plants:[]})
 		this.setState({ selectedMonth: month })
 		let list = []
@@ -80,6 +82,7 @@ export default class PlantInformation extends Component {
 		plants.forEach(doc => {
 			list.push(doc.data())
 			this.setState({plants:list})
+			this.setState({isLoading:false})
 		})		
 	}
 
@@ -126,7 +129,7 @@ export default class PlantInformation extends Component {
 				</View>
 				{/* <Text style={styles.title}>{this.state.selectedMonth}</Text> */}
 				<ScrollView style={{paddingTop:90}}>
-					
+					<ActivityIndicator size="small" animating={this.state.isLoading} color={theme[themeState].footerActiveColor} />
 					<Grid
 						style={styles.list}
 						renderItem={this.renderPlant}
