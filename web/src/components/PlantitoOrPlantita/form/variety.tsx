@@ -1,4 +1,4 @@
-import React, { Component, createRef, RefObject } from 'react';
+import React, { Component, createRef } from 'react';
 import { PlantitoVariety } from '../../../services/contracts';
 
 interface Props {
