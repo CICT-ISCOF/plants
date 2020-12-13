@@ -93,6 +93,8 @@ export default class List extends Component<RouteComponentProps, State> {
 					description: parent.description,
 					layouts: parent.layouts,
 					preparations: parent.preparations,
+					schedule_image_url: parent.schedule_image_url,
+					images: parent.images,
 				},
 				'plants',
 				false
@@ -144,6 +146,27 @@ export default class List extends Component<RouteComponentProps, State> {
 										<p className='card-text'>
 											{plant.description}
 										</p>
+										<div className='m-2 text-center'>
+											<img
+												src={plant.schedule_image_url}
+												alt=''
+												style={{ maxHeight: '200px' }}
+												className='img-fluid'
+											/>
+										</div>
+										<div className='m-2'>
+											{plant.images.map((url, index) => (
+												<img
+													src={url}
+													alt=''
+													key={index}
+													className='img-fluid m-2'
+													style={{
+														maxHeight: '200px',
+													}}
+												/>
+											))}
+										</div>
 										<b className='card-text'>Months:</b>
 										<ul className='mb-3 list-group'>
 											{plant.months.map((month) => (

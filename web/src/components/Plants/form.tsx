@@ -23,6 +23,8 @@ type State = {
 	description: string;
 	layouts: Array<string>;
 	preparations: Array<Preparation>;
+	schedule_image_url: string;
+	images: Array<string>;
 };
 
 type Params = {
@@ -42,7 +44,10 @@ export default class Form extends Component<
 	plantService = new Model<Plant>(undefined, 'plants');
 	fileInputRef = createRef<HTMLInputElement>();
 	fileReader = new FileReader();
+	schedFileRef = createRef<HTMLInputElement>();
+	schedReader = new FileReader();
 
+	imageInputRefs: Array<FileRef> = [];
 	layoutInputRefs: Array<FileRef> = [];
 
 	constructor(props: RouteComponentProps<Params>) {
@@ -65,8 +70,11 @@ export default class Form extends Component<
 					title: '',
 					type: '',
 					steps: [''],
+					description: '',
 				},
 			],
+			images: [],
+			schedule_image_url: 'https://via.placeholder.com/200',
 		};
 	}
 
@@ -93,7 +101,7 @@ export default class Form extends Component<
 		if (fragments.includes('edit')) {
 			const id = this.props.match.params.id;
 			new Model<Plant>(undefined, 'plants').find(id).then((document) => {
-				document.layouts.forEach((_url, index) => {
+				this.layoutInputRefs = document.layouts.map((_url, index) => {
 					const ref = {
 						ref: createRef<HTMLInputElement>(),
 						reader: new FileReader(),
@@ -103,8 +111,22 @@ export default class Form extends Component<
 						layouts.splice(index, 1, String(event.target?.result));
 						this.setState({ layouts });
 					};
-					this.layoutInputRefs.push(ref);
+					return ref;
 				});
+
+				this.imageInputRefs = document.images.map((_url, index) => {
+					const ref = {
+						ref: createRef<HTMLInputElement>(),
+						reader: new FileReader(),
+					};
+					ref.reader.onload = (event) => {
+						const images = this.state.images;
+						images.splice(index, 1, String(event.target?.result));
+						this.setState({ images });
+					};
+					return ref;
+				});
+
 				this.setState({
 					mode: 'Edit',
 					...document,
@@ -117,6 +139,11 @@ export default class Form extends Component<
 		this.fileReader.onload = (event) => {
 			this.setState({
 				photo_url: String(event.target?.result),
+			});
+		};
+		this.schedReader.onload = (event) => {
+			this.setState({
+				schedule_image_url: String(event.target?.result),
 			});
 		};
 	}
@@ -168,7 +195,10 @@ export default class Form extends Component<
 		});
 		this.request()
 			.then(() => toastr.success('Plant saved successfully.'))
-			.catch(() => toastr.error('Unable to save Plant.'))
+			.catch((error) => {
+				console.log(error);
+				toastr.error('Unable to save Plant.');
+			})
 			.finally(() =>
 				this.setState({
 					processing: false,
@@ -188,6 +218,8 @@ export default class Form extends Component<
 				description: this.state.description,
 				layouts: this.state.layouts,
 				preparations: this.state.preparations,
+				schedule_image_url: this.state.schedule_image_url,
+				images: this.state.images,
 			},
 			'plants'
 		).save();
@@ -287,6 +319,142 @@ export default class Form extends Component<
 						</select>
 					</div>
 					<div className='form-group'>
+						<label htmlFor='schedule'>Schedule:</label>
+						<input
+							type='file'
+							name='photo'
+							id='photo'
+							className='d-none'
+							ref={this.schedFileRef}
+							onChange={(e) => {
+								if (
+									e.target.files &&
+									e.target.files.length > 0
+								) {
+									this.schedReader.readAsDataURL(
+										e.target.files[0]
+									);
+								}
+							}}
+						/>
+						<div className='text-center'>
+							<img
+								src={this.state.schedule_image_url}
+								alt='Upload'
+								className='img-fluid rounded my-3 mx-2 text-center clickable'
+								style={{
+									maxHeight: '200px',
+								}}
+								onClick={(e) => {
+									e.preventDefault();
+									this.schedFileRef.current?.click();
+								}}
+							/>
+						</div>
+					</div>
+					<div className='form-group'>
+						<label htmlFor='month'>Images:</label>
+						<div className='m-1'>
+							<button
+								className={`btn btn-info btn-sm ${
+									this.state.processing ? 'disabled' : ''
+								}`}
+								disabled={this.state.processing}
+								onClick={(e) => {
+									e.preventDefault();
+									const ref = {
+										ref: createRef<HTMLInputElement>(),
+										reader: new FileReader(),
+									};
+									const index =
+										this.imageInputRefs.push(ref) - 1;
+									ref.reader.onload = (event) => {
+										const images = this.state.images;
+										images.splice(
+											index,
+											1,
+											String(event.target?.result)
+										);
+										this.setState({ images });
+									};
+									const images = this.state.images;
+									images.splice(
+										index,
+										1,
+										'https://via.placeholder.com/200'
+									);
+									this.setState({ images });
+								}}
+							>
+								Add Image
+							</button>
+						</div>
+						<div className='row'>
+							{this.state.images.map((url, index) => (
+								<div
+									className='col-12 col-md-4 col-lg-3'
+									key={index}
+								>
+									<input
+										type='file'
+										name=''
+										id=''
+										className='d-none'
+										ref={this.imageInputRefs[index].ref}
+										onChange={(e) => {
+											e.preventDefault();
+											if (
+												e.target.files &&
+												e.target.files.length > 0
+											) {
+												this.imageInputRefs[
+													index
+												].reader.readAsDataURL(
+													e.target.files[0]
+												);
+											}
+										}}
+									/>
+									<img
+										src={url}
+										style={{ maxHeight: '200px' }}
+										alt=''
+										className='img-fluid clickable'
+										onClick={(e) => {
+											e.preventDefault();
+											this.imageInputRefs[
+												index
+											].ref.current?.click();
+										}}
+									/>
+									<div className='m-2'>
+										<button
+											className={`btn btn-danger btn-sm ${
+												this.state.processing
+													? 'disabled'
+													: ''
+											}`}
+											disabled={this.state.processing}
+											onClick={(e) => {
+												e.preventDefault();
+												this.imageInputRefs.splice(
+													index,
+													1
+												);
+												const images = this.state
+													.images;
+												images.splice(index, 1);
+												this.setState({ images });
+											}}
+										>
+											Remove
+										</button>
+									</div>
+								</div>
+							))}
+						</div>
+					</div>
+					<div className='form-group'>
 						<label htmlFor='month'>Months:</label>
 						<div className='row'>
 							{[
@@ -341,7 +509,12 @@ export default class Form extends Component<
 								<tr>
 									<td>
 										<button
-											className='btn btn-info btn-sm'
+											className={`btn btn-info btn-sm ${
+												this.state.processing
+													? 'disabled'
+													: ''
+											}`}
+											disabled={this.state.processing}
 											onClick={(e) => {
 												e.preventDefault();
 												if (
@@ -442,7 +615,14 @@ export default class Form extends Component<
 											</td>
 											<td>
 												<button
-													className='btn btn-danger btn-sm'
+													className={`btn btn-danger btn-sm ${
+														this.state.processing
+															? 'disabled'
+															: ''
+													}`}
+													disabled={
+														this.state.processing
+													}
 													onClick={(e) => {
 														e.preventDefault();
 														const companions = this
@@ -472,7 +652,12 @@ export default class Form extends Component<
 								<tr>
 									<td>
 										<button
-											className='btn btn-info btn-sm'
+											className={`btn btn-info btn-sm ${
+												this.state.processing
+													? 'disabled'
+													: ''
+											}`}
+											disabled={this.state.processing}
 											onClick={(e) => {
 												e.preventDefault();
 												const layouts = this.state
@@ -556,7 +741,12 @@ export default class Form extends Component<
 										</td>
 										<td>
 											<button
-												className='btn btn-danger btn-sm'
+												className={`btn btn-danger btn-sm ${
+													this.state.processing
+														? 'disabled'
+														: ''
+												}`}
+												disabled={this.state.processing}
 												onClick={(e) => {
 													e.preventDefault();
 													this.layoutInputRefs.splice(
@@ -581,13 +771,17 @@ export default class Form extends Component<
 						<label htmlFor='preparations'>Preparations:</label>
 						<div className='m-1'>
 							<button
-								className='btn btn-info btn-sm'
+								className={`btn btn-info btn-sm ${
+									this.state.processing ? 'disabled' : ''
+								}`}
+								disabled={this.state.processing}
 								onClick={(e) => {
 									e.preventDefault();
 									this.addPreparation({
 										title: '',
 										type: '',
 										steps: [''],
+										description: '',
 									});
 								}}
 							>
@@ -596,7 +790,10 @@ export default class Form extends Component<
 						</div>
 						<div className='m-1'>
 							{this.state.preparations.map(
-								({ title, type, steps }, index) => (
+								(
+									{ title, type, steps, description },
+									index
+								) => (
 									<div
 										className='mx-1 my-3 p-2 shadow rounded border'
 										key={index}
@@ -627,6 +824,32 @@ export default class Form extends Component<
 												);
 											}}
 										/>
+										<textarea
+											name='title'
+											id='description'
+											placeholder={`Description ${
+												index + 1
+											}`}
+											className={`form-control form-control-sm my-2 ${
+												this.state.processing
+													? 'disabled'
+													: ''
+											}`}
+											disabled={this.state.processing}
+											value={description}
+											onChange={(e) => {
+												e.preventDefault();
+												const preparation = this.getPreparation(
+													index
+												);
+												preparation.description =
+													e.target.value;
+												this.setPreparation(
+													preparation,
+													index
+												);
+											}}
+										></textarea>
 										<input
 											type='text'
 											name='type'
@@ -655,7 +878,14 @@ export default class Form extends Component<
 										<div className='m-1'>
 											<div className='m-1'>
 												<button
-													className='btn btn-info btn-sm'
+													className={`btn btn-info btn-sm ${
+														this.state.processing
+															? 'disabled'
+															: ''
+													}`}
+													disabled={
+														this.state.processing
+													}
 													onClick={(e) => {
 														e.preventDefault();
 														const preparation = this.getPreparation(
@@ -711,8 +941,60 @@ export default class Form extends Component<
 															);
 														}}
 													/>
+													<button
+														className={`btn btn-danger btn-sm ${
+															this.state
+																.processing
+																? 'disabled'
+																: ''
+														}`}
+														disabled={
+															this.state
+																.processing
+														}
+														onClick={(e) => {
+															e.preventDefault();
+															const preparation = this.getPreparation(
+																index
+															);
+															preparation.steps.splice(
+																stepIndex,
+																1
+															);
+															this.setPreparation(
+																preparation,
+																index
+															);
+														}}
+													>
+														Remove Step
+													</button>
 												</div>
 											))}
+										</div>
+										<div className='m-1'>
+											<button
+												className={`btn btn-danger btn-sm ${
+													this.state.processing
+														? 'disabled'
+														: ''
+												}`}
+												disabled={this.state.processing}
+												onClick={(e) => {
+													e.preventDefault();
+													const preparations = this
+														.state.preparations;
+													preparations.splice(
+														index,
+														1
+													);
+													this.setState({
+														preparations,
+													});
+												}}
+											>
+												Remove Preparation
+											</button>
 										</div>
 									</div>
 								)

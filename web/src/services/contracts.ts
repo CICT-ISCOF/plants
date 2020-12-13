@@ -35,6 +35,8 @@ export interface Plant extends Model {
 	name: string;
 	category_id: string;
 	photo_url: string;
+	schedule_image_url: string;
+	images: Array<string>;
 	months: Array<string>;
 	companions: Array<PlantCompanion>;
 	description: string;
@@ -61,6 +63,7 @@ export interface Preparation {
 	title: string;
 	steps: Array<string>;
 	type: string;
+	description: string;
 }
 
 export interface PlantitoItem {
