@@ -9,7 +9,7 @@ export default class Variety extends Component<Props> {
 	render() {
 		const { variety } = this.props;
 		return (
-			<div className='card m-2'>
+			<div className='card mx-2 my-3 border'>
 				<div className='card-body'>
 					<img
 						src={variety.photo_url}
@@ -19,7 +19,8 @@ export default class Variety extends Component<Props> {
 							maxHeight: '200px',
 						}}
 					/>
-					<p className='card-text'>{variety.name}</p>
+					<b className='card-text'>Name:</b>
+					<p className='card-text mt-2'>{variety.name}</p>
 				</div>
 			</div>
 		);

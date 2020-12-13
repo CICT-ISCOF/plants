@@ -62,7 +62,14 @@ export class State {
 		if (!(key in this.listeners)) {
 			this.listeners[key] = [];
 		}
-		this.listeners[key].push(callback);
+		return this.listeners[key].push(callback) - 1;
+	}
+
+	unlisten(key: string, index: number) {
+		if (!(key in this.listeners)) {
+			return;
+		}
+		this.listeners[key].splice(index, 1);
 	}
 }
 
