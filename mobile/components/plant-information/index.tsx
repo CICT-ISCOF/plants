@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React, { Component } from 'react';
 import {
 	Text,
@@ -13,11 +14,22 @@ import { Entypo } from '@expo/vector-icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import stylesWrap from './index.style';
 import { Ionicons } from '@expo/vector-icons';
+=======
+import React, { Component } from 'react'
+import { Text, View, Image, TouchableOpacity, FlatList, ScrollView, ActivityIndicator} from 'react-native'
+import { Actions } from 'react-native-router-flux'
+import globalStyles from '../../constants/style'
+import { Entypo } from '@expo/vector-icons'; 
+import { MaterialCommunityIcons } from '@expo/vector-icons'; 
+import styles from './index.style';
+import { Ionicons } from '@expo/vector-icons'; 
+>>>>>>> 8156bf94a72c2fdad2b1a499d622a64a36b4206c
 import Grid from 'react-native-grid-component';
 import firebase from 'firebase';
 import theme from '../../constants/color';
 import state from '../../services/state';
 const themeState = theme.themState;
+
 
 export default class PlantInformation extends Component {
 	state = {
@@ -35,6 +47,7 @@ export default class PlantInformation extends Component {
 			'November',
 			'December',
 		],
+<<<<<<< HEAD
 		selectedMonth: 'January',
 		plants: [],
 		globalStyles: globalStylesWrap(state.get('theme', 'dark')),
@@ -46,6 +59,11 @@ export default class PlantInformation extends Component {
 
 	componentWillUnmount() {
 		state.unlisten('theme', this.key);
+=======
+		selectedMonth:'January',
+		plants:[],
+		isLoading:true
+>>>>>>> 8156bf94a72c2fdad2b1a499d622a64a36b4206c
 	}
 
 	componentDidMount() {
@@ -56,6 +74,7 @@ export default class PlantInformation extends Component {
 			});
 		});
 		const firebaseConfig = {
+<<<<<<< HEAD
 			apiKey: 'AIzaSyBerHExagMFPqVaCKJKBkcyGb9I2Oufn7A',
 			authDomain: 'plants-564d0.firebaseapp.com',
 			databaseURL: 'https://plants-564d0.firebaseio.com',
@@ -71,6 +90,22 @@ export default class PlantInformation extends Component {
 		this.plants = firebase.firestore().collection('plants');
 		this.changeListener();
 		this.selectMonth('January');
+=======
+			apiKey: "AIzaSyBerHExagMFPqVaCKJKBkcyGb9I2Oufn7A",
+			authDomain: "plants-564d0.firebaseapp.com",
+			databaseURL: "https://plants-564d0.firebaseio.com",
+			projectId: "plants-564d0",
+			storageBucket: "plants-564d0.appspot.com",
+			messagingSenderId: "720876541922",
+			appId: "1:720876541922:web:1af53c5360ccaedadf4bbb",
+			measurementId: "G-7V9LPDCYTB"
+		}		
+		if(!firebase.apps.length){
+			firebase.initializeApp(firebaseConfig)
+		}	
+		this.plants = firebase.firestore().collection('plants')	
+		this.selectMonth('January')
+>>>>>>> 8156bf94a72c2fdad2b1a499d622a64a36b4206c
 	}
 
 	async changeListener() {
@@ -92,17 +127,17 @@ export default class PlantInformation extends Component {
 		Actions.Home();
 	}
 
-	async selectMonth(month) {
-		this.setState({ plants: [] });
-		this.setState({ selectedMonth: month });
-		let list = [];
-		const plants = await this.plants
-			.where('months', 'array-contains', month)
-			.get();
-		plants.forEach((doc) => {
-			list.push(doc.data());
-			this.setState({ plants: list });
-		});
+	async selectMonth(month){
+		this.setState({isLoading:true})
+		this.setState({plants:[]})
+		this.setState({ selectedMonth: month })
+		let list = []
+		const plants = await this.plants.where('months', 'array-contains', month).get();
+		plants.forEach(doc => {
+			list.push(doc.data())
+			this.setState({plants:list})
+			this.setState({isLoading:false})
+		})		
 	}
 
 	viewPlantInfo(id, plant) {
@@ -203,7 +238,12 @@ export default class PlantInformation extends Component {
 					</ScrollView>
 				</View>
 				{/* <Text style={styles.title}>{this.state.selectedMonth}</Text> */}
+<<<<<<< HEAD
 				<ScrollView style={{ paddingTop: 90 }}>
+=======
+				<ScrollView style={{paddingTop:90}}>
+					<ActivityIndicator size="small" animating={this.state.isLoading} color={theme[themeState].footerActiveColor} />
+>>>>>>> 8156bf94a72c2fdad2b1a499d622a64a36b4206c
 					<Grid
 						style={styles.list}
 						renderItem={this.renderPlant}
