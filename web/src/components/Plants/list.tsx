@@ -5,6 +5,8 @@ import { Link, RouteComponentProps } from 'react-router-dom';
 import state from '../../services/state';
 import toastr from 'toastr';
 import Model from '../../services/model';
+import Controls from '../Controls';
+import Preparation from './preparation';
 
 type State = {
 	plants: Array<Plant>;
@@ -90,6 +92,7 @@ export default class List extends Component<RouteComponentProps, State> {
 					companions: companions,
 					description: parent.description,
 					layouts: parent.layouts,
+					preparations: parent.preparations,
 				},
 				'plants',
 				false
@@ -193,92 +196,32 @@ export default class List extends Component<RouteComponentProps, State> {
 												</div>
 											))}
 										</div>
-										{state.has('user') ? (
-											<Link
-												className='btn btn-info btn-sm'
-												to={this.path(
-													`${plant.id}/edit`
-												)}
-											>
-												Edit
-											</Link>
+										<b className='card-text'>
+											Preparations:
+										</b>
+										{plant.preparations.length === 0 ? (
+											<p className='card-text'>None</p>
 										) : null}
-										{state.has('user') ? (
-											<a
-												className='btn btn-danger btn-sm'
-												href={this.path(
-													`/${plant.id}/delete`
-												)}
-												data-toggle='modal'
-												data-target={`#deletePlantModal${plant.id}`}
-											>
-												Delete
-											</a>
-										) : null}
-										{state.has('user') ? (
-											<div
-												className='modal fade'
-												id={`deletePlantModal${plant.id}`}
-												tabIndex={-1}
-												role='dialog'
-												aria-labelledby={`deletePlantModalLabel${plant.id}`}
-												aria-hidden='true'
-											>
-												<div
-													className='modal-dialog modal-dialog-centered'
-													role='document'
-												>
-													<div className='modal-content'>
-														<div className='modal-header'>
-															<h5
-																className='modal-title'
-																id={`deletePlantModalLabel${plant.id}`}
-															>
-																Delete Plant
-															</h5>
-															<button
-																type='button'
-																className='close'
-																data-dismiss='modal'
-																aria-label='Close'
-															>
-																<span aria-hidden='true'>
-																	&times;
-																</span>
-															</button>
-														</div>
-														<div className='modal-body'>
-															Are you sure you
-															want to delete{' '}
-															{plant.name}?
-														</div>
-														<div className='modal-footer'>
-															<button
-																type='button'
-																className='btn btn-danger btn-sm'
-																onClick={(
-																	e
-																) => {
-																	e.preventDefault();
-																	this.remove(
-																		index
-																	);
-																}}
-															>
-																Delete
-															</button>
-															<button
-																type='button'
-																className='btn btn-secondary btn-sm'
-																data-dismiss='modal'
-															>
-																Close
-															</button>
-														</div>
-													</div>
-												</div>
-											</div>
-										) : null}
+										<div className='my-3'>
+											{plant.preparations.map(
+												(preparation, index) => (
+													<Preparation
+														preparation={
+															preparation
+														}
+														key={index}
+													/>
+												)
+											)}
+										</div>
+										<Controls
+											{...this.props}
+											{...this.state}
+											model={plant}
+											index={index}
+											remove={this.remove.bind(this)}
+											name='Plant'
+										/>
 									</div>
 								</div>
 							</div>

@@ -7,7 +7,6 @@ const routes = {
 	LOGIN: '/',
 	PESTS: '/pests',
 	DISEASES: '/diseases',
-	PREPARATIONS: '/preparations',
 	PLANTITOSORPLANTITAS: '/plantitos-plantitas',
 };
 

@@ -1,6 +1,11 @@
 import React, { Component, createRef } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { Category, Plant, PlantCompanion } from '../../services/contracts';
+import {
+	Category,
+	Plant,
+	PlantCompanion,
+	Preparation,
+} from '../../services/contracts';
 import toastr from 'toastr';
 import Model from '../../services/model';
 
@@ -17,6 +22,7 @@ type State = {
 	companions: Array<PlantCompanion>;
 	description: string;
 	layouts: Array<string>;
+	preparations: Array<Preparation>;
 };
 
 type Params = {
@@ -54,6 +60,13 @@ export default class Form extends Component<
 			companions: [],
 			description: '',
 			layouts: [],
+			preparations: [
+				{
+					title: '',
+					type: '',
+					steps: [''],
+				},
+			],
 		};
 	}
 
@@ -121,6 +134,34 @@ export default class Form extends Component<
 		}
 	}
 
+	addPreparation(preparation: Preparation) {
+		const preparations = this.state.preparations;
+		preparations.push(preparation);
+		this.setState({
+			preparations,
+		});
+	}
+
+	getPreparation(index: number) {
+		return this.state.preparations[index];
+	}
+
+	setPreparation(preparation: Preparation, index: number) {
+		const preparations = this.state.preparations;
+		preparations.splice(index, 1, preparation);
+		this.setState({
+			preparations,
+		});
+	}
+
+	removePreparation(index: number) {
+		const preparations = this.state.preparations;
+		preparations.splice(index, 1);
+		this.setState({
+			preparations,
+		});
+	}
+
 	submit() {
 		this.setState({
 			processing: true,
@@ -146,6 +187,7 @@ export default class Form extends Component<
 				companions: this.state.companions,
 				description: this.state.description,
 				layouts: this.state.layouts,
+				preparations: this.state.preparations,
 			},
 			'plants'
 		).save();
@@ -534,6 +576,148 @@ export default class Form extends Component<
 								))}
 							</tbody>
 						</table>
+					</div>
+					<div className='form-group'>
+						<label htmlFor='preparations'>Preparations:</label>
+						<div className='m-1'>
+							<button
+								className='btn btn-info btn-sm'
+								onClick={(e) => {
+									e.preventDefault();
+									this.addPreparation({
+										title: '',
+										type: '',
+										steps: [''],
+									});
+								}}
+							>
+								Add Row
+							</button>
+						</div>
+						<div className='m-1'>
+							{this.state.preparations.map(
+								({ title, type, steps }, index) => (
+									<div
+										className='mx-1 my-3 p-2 shadow rounded border'
+										key={index}
+									>
+										<h5>Preparation {index + 1}</h5>
+										<input
+											type='text'
+											name='title'
+											id='title'
+											placeholder={`Title ${index + 1}`}
+											className={`form-control form-control-sm my-2 ${
+												this.state.processing
+													? 'disabled'
+													: ''
+											}`}
+											disabled={this.state.processing}
+											value={title}
+											onChange={(e) => {
+												e.preventDefault();
+												const preparation = this.getPreparation(
+													index
+												);
+												preparation.title =
+													e.target.value;
+												this.setPreparation(
+													preparation,
+													index
+												);
+											}}
+										/>
+										<input
+											type='text'
+											name='type'
+											id='type'
+											placeholder={`Type ${index + 1}`}
+											className={`form-control form-control-sm my-2 ${
+												this.state.processing
+													? 'disabled'
+													: ''
+											}`}
+											disabled={this.state.processing}
+											value={type}
+											onChange={(e) => {
+												e.preventDefault();
+												const preparation = this.getPreparation(
+													index
+												);
+												preparation.type =
+													e.target.value;
+												this.setPreparation(
+													preparation,
+													index
+												);
+											}}
+										/>
+										<div className='m-1'>
+											<div className='m-1'>
+												<button
+													className='btn btn-info btn-sm'
+													onClick={(e) => {
+														e.preventDefault();
+														const preparation = this.getPreparation(
+															index
+														);
+														preparation.steps.push(
+															''
+														);
+														this.setPreparation(
+															preparation,
+															index
+														);
+													}}
+												>
+													Add Step
+												</button>
+											</div>
+											{steps.map((step, stepIndex) => (
+												<div>
+													<h6>
+														Step {stepIndex + 1}
+													</h6>
+													<input
+														key={stepIndex}
+														type='text'
+														name='type'
+														id='type'
+														placeholder={`Step ${
+															stepIndex + 1
+														}`}
+														className={`form-control form-control-sm m-2 ${
+															this.state
+																.processing
+																? 'disabled'
+																: ''
+														}`}
+														disabled={
+															this.state
+																.processing
+														}
+														value={step}
+														onChange={(e) => {
+															e.preventDefault();
+															const preparation = this.getPreparation(
+																index
+															);
+															preparation.steps[
+																stepIndex
+															] = e.target.value;
+															this.setPreparation(
+																preparation,
+																index
+															);
+														}}
+													/>
+												</div>
+											))}
+										</div>
+									</div>
+								)
+							)}
+						</div>
 					</div>
 					<div className='form-group'>
 						<button

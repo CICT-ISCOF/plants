@@ -39,6 +39,7 @@ export interface Plant extends Model {
 	companions: Array<PlantCompanion>;
 	description: string;
 	layouts: Array<string>;
+	preparations: Array<Preparation>;
 }
 
 export interface Pest extends Model {
@@ -56,11 +57,10 @@ export interface Disease extends Model {
 	description: string;
 }
 
-export interface Preparation extends Model {
+export interface Preparation {
 	title: string;
 	steps: Array<string>;
 	type: string;
-	plant_id: string;
 }
 
 export interface PlantitoItem {
