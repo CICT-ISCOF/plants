@@ -5,6 +5,7 @@ import { Link, RouteComponentProps } from 'react-router-dom';
 import db from '../../firebase/firestore';
 import state from '../../services/state';
 import toastr from 'toastr';
+import Controls from '../Controls';
 
 type State = {
 	tips: Array<Tip>;
@@ -76,92 +77,13 @@ export default class List extends Component<RouteComponentProps, State> {
 							>
 								<div className='border rounded shadow p-3'>
 									<h3 className='mb-0'>{tip.title}</h3>
-									<div className='d-flex'>
-										{state.has('user') ? (
-											<Link
-												className='btn btn-info btn-sm mx-1'
-												to={this.path(`${tip.id}/edit`)}
-											>
-												Edit
-											</Link>
-										) : null}
-										{state.has('user') ? (
-											<a
-												className='btn btn-danger btn-sm mx-1'
-												href={this.path(
-													`/${tip.id}/delete`
-												)}
-												data-toggle='modal'
-												data-target={`#deleteTipModal${tip.id}`}
-											>
-												Delete
-											</a>
-										) : null}
-										{state.has('user') ? (
-											<div
-												className='modal fade'
-												id={`deleteTipModal${tip.id}`}
-												tabIndex={-1}
-												role='dialog'
-												aria-labelledby={`deleteTipModalLabel${tip.id}`}
-												aria-hidden='true'
-											>
-												<div
-													className='modal-dialog modal-dialog-centered'
-													role='document'
-												>
-													<div className='modal-content'>
-														<div className='modal-header'>
-															<h5
-																className='modal-title'
-																id={`deleteCategoryModalLabel${tip.id}`}
-															>
-																Delete Tip
-															</h5>
-															<button
-																type='button'
-																className='close'
-																data-dismiss='modal'
-																aria-label='Close'
-															>
-																<span aria-hidden='true'>
-																	&times;
-																</span>
-															</button>
-														</div>
-														<div className='modal-body'>
-															Are you sure you
-															want to delete{' '}
-															{tip.title}?
-														</div>
-														<div className='modal-footer'>
-															<button
-																type='button'
-																className='btn btn-danger btn-sm'
-																onClick={(
-																	e
-																) => {
-																	e.preventDefault();
-																	this.remove(
-																		index
-																	);
-																}}
-															>
-																Delete
-															</button>
-															<button
-																type='button'
-																className='btn btn-secondary btn-sm'
-																data-dismiss='modal'
-															>
-																Close
-															</button>
-														</div>
-													</div>
-												</div>
-											</div>
-										) : null}
-									</div>
+									<Controls
+										{...this.props}
+										model={tip}
+										remove={this.remove.bind(this)}
+										index={index}
+										name='Tip'
+									/>
 									{tip.items.length > 0
 										? tip.items.map((item, index) => (
 												<div

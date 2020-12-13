@@ -183,18 +183,20 @@ export default class Form extends Component<
 										<h3 className='mt-3'>
 											Item {index + 1}:
 										</h3>
-										<img
-											src={item.photo_url}
-											alt=''
-											className='img-fluid my-2 clickable'
-											style={{
-												maxHeight: '200px',
-											}}
-											onClick={(e) => {
-												e.preventDefault();
-												this.promptFile(index);
-											}}
-										/>
+										<div className='text-center'>
+											<img
+												src={item.photo_url}
+												alt=''
+												className='img-fluid my-2 clickable'
+												style={{
+													maxHeight: '200px',
+												}}
+												onClick={(e) => {
+													e.preventDefault();
+													this.promptFile(index);
+												}}
+											/>
+										</div>
 										<input
 											type='file'
 											name={`item-file-${index}`}

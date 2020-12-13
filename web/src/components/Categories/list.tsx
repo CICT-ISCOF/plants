@@ -5,12 +5,16 @@ import { Link, RouteComponentProps } from 'react-router-dom';
 import db from '../../firebase/firestore';
 import state from '../../services/state';
 import toastr from 'toastr';
+import Controls from '../Controls';
+import Model from '../../services/model';
 
 type State = {
 	categories: Array<Category>;
 };
 
 export default class List extends Component<RouteComponentProps, State> {
+	service = new Model<Category>(undefined, 'categories');
+
 	constructor(props: RouteComponentProps) {
 		super(props);
 		this.state = {
@@ -19,17 +23,7 @@ export default class List extends Component<RouteComponentProps, State> {
 	}
 
 	componentDidMount() {
-		const collection = db.collection('categories');
-		collection.onSnapshot((snapshot) => {
-			const categories: Array<Category> = [];
-			snapshot.forEach((document) =>
-				categories.push({
-					...(document.data() as Category),
-					id: document.id,
-				})
-			);
-			this.setState({ categories });
-		});
+		this.service.get((categories) => this.setState({ categories }));
 	}
 
 	path(url: string) {
@@ -41,7 +35,6 @@ export default class List extends Component<RouteComponentProps, State> {
 		const modalID = `#deleteCategoryModal${category.id}`;
 		const modal = $(modalID) as any;
 		modal.on('hidden.bs.modal', async () => {
-			const document = db.collection('categories').doc(category.id);
 			db.collection('plants')
 				.where('category_id', '==', category.id)
 				.get()
@@ -51,7 +44,7 @@ export default class List extends Component<RouteComponentProps, State> {
 					);
 				});
 			try {
-				await document.delete();
+				await this.service.delete(category.id as string);
 				toastr.success('Category deleted successfully.');
 			} catch (error) {
 				console.log(error);
@@ -92,92 +85,13 @@ export default class List extends Component<RouteComponentProps, State> {
 										<h3 className='card-title'>
 											{category.title}
 										</h3>
-										{state.has('user') ? (
-											<Link
-												className='btn btn-info btn-sm'
-												to={this.path(
-													`${category.id}/edit`
-												)}
-											>
-												Edit
-											</Link>
-										) : null}
-										{state.has('user') ? (
-											<a
-												className='btn btn-danger btn-sm'
-												href={this.path(
-													`/${category.id}/delete`
-												)}
-												data-toggle='modal'
-												data-target={`#deleteCategoryModal${category.id}`}
-											>
-												Delete
-											</a>
-										) : null}
-										{state.has('user') ? (
-											<div
-												className='modal fade'
-												id={`deleteCategoryModal${category.id}`}
-												tabIndex={-1}
-												role='dialog'
-												aria-labelledby={`deleteCategoryModalLabel${category.id}`}
-												aria-hidden='true'
-											>
-												<div
-													className='modal-dialog modal-dialog-centered'
-													role='document'
-												>
-													<div className='modal-content'>
-														<div className='modal-header'>
-															<h5
-																className='modal-title'
-																id={`deleteCategoryModalLabel${category.id}`}
-															>
-																Delete Category
-															</h5>
-															<button
-																type='button'
-																className='close'
-																data-dismiss='modal'
-																aria-label='Close'
-															>
-																<span aria-hidden='true'>
-																	&times;
-																</span>
-															</button>
-														</div>
-														<div className='modal-body'>
-															Are you sure you
-															want to delete{' '}
-															{category.title}?
-														</div>
-														<div className='modal-footer'>
-															<button
-																type='button'
-																className='btn btn-danger btn-sm'
-																onClick={(
-																	e
-																) => {
-																	e.preventDefault();
-																	this.remove(
-																		index
-																	);
-																}}
-															>
-																Delete
-															</button>
-															<button
-																type='button'
-																className='btn btn-secondary btn-sm'
-																data-dismiss='modal'
-															>
-																Close
-															</button>
-														</div>
-													</div>
-												</div>
-											</div>
-										) : null}
+										<Controls
+											model={category}
+											{...this.props}
+											index={index}
+											remove={this.remove.bind(this)}
+											name='Category'
+										/>
 									</div>
 								</div>
 							</div>

@@ -5,6 +5,7 @@ import { Link, RouteComponentProps } from 'react-router-dom';
 import state from '../../services/state';
 import toastr from 'toastr';
 import Model from '../../services/model';
+import Controls from '../Controls';
 
 type State = {
 	pests: Array<Pest>;
@@ -138,92 +139,15 @@ export default class List extends Component<RouteComponentProps, State> {
 												)}
 											</ul>
 										</div>
-										{state.has('user') ? (
-											<Link
-												className='btn btn-info btn-sm'
-												to={this.path(
-													`${pest.id}/edit`
-												)}
-											>
-												Edit
-											</Link>
-										) : null}
-										{state.has('user') ? (
-											<a
-												className='btn btn-danger btn-sm'
-												href={this.path(
-													`/${pest.id}/delete`
-												)}
-												data-toggle='modal'
-												data-target={`#deletePestModal${pest.id}`}
-											>
-												Delete
-											</a>
-										) : null}
-										{state.has('user') ? (
-											<div
-												className='modal fade'
-												id={`deletePestModal${pest.id}`}
-												tabIndex={-1}
-												role='dialog'
-												aria-labelledby={`deletePestModalLabel${pest.id}`}
-												aria-hidden='true'
-											>
-												<div
-													className='modal-dialog modal-dialog-centered'
-													role='document'
-												>
-													<div className='modal-content'>
-														<div className='modal-header'>
-															<h5
-																className='modal-title'
-																id={`deletePestModalLabel${pest.id}`}
-															>
-																Delete Pest
-															</h5>
-															<button
-																type='button'
-																className='close'
-																data-dismiss='modal'
-																aria-label='Close'
-															>
-																<span aria-hidden='true'>
-																	&times;
-																</span>
-															</button>
-														</div>
-														<div className='modal-body'>
-															Are you sure you
-															want to delete{' '}
-															{pest.name}?
-														</div>
-														<div className='modal-footer'>
-															<button
-																type='button'
-																className='btn btn-danger btn-sm'
-																onClick={(
-																	e
-																) => {
-																	e.preventDefault();
-																	this.remove(
-																		index
-																	);
-																}}
-															>
-																Delete
-															</button>
-															<button
-																type='button'
-																className='btn btn-secondary btn-sm'
-																data-dismiss='modal'
-															>
-																Close
-															</button>
-														</div>
-													</div>
-												</div>
-											</div>
-										) : null}
+									</div>
+									<div className='card-footer'>
+										<Controls
+											model={pest}
+											{...this.props}
+											index={index}
+											name='Pest'
+											remove={this.remove.bind(this)}
+										/>
 									</div>
 								</div>
 							</div>

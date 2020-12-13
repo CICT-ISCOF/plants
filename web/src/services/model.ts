@@ -35,25 +35,37 @@ export default class Model<T extends ModelContract> {
 		}
 	}
 
-	create(data: T) {
+	async create(data: T) {
 		if (this.notify) {
 			toastr.info('Sending new data to server.');
 		}
-		return this.collection.add({
+		const ref = await this.collection.add({
 			...data,
 			created_at: firebase.firestore.FieldValue.serverTimestamp(),
 			updated_at: firebase.firestore.FieldValue.serverTimestamp(),
 		});
+		const document = await ref.get();
+		return {
+			...(document.data() as T),
+			id: document.id,
+		};
 	}
 
-	update() {
+	async update() {
 		if (this.notify) {
 			toastr.info('Sending updated data to server.');
 		}
-		return this.collection.doc((this.data as T).id as string).update({
+		await this.collection.doc((this.data as T).id as string).update({
 			...this.getData(),
 			updated_at: firebase.firestore.FieldValue.serverTimestamp(),
 		});
+		const document = await this.collection
+			.doc((this.data as T).id as string)
+			.get();
+		return {
+			...(document.data() as T),
+			id: document.id,
+		};
 	}
 
 	getRef() {

@@ -60,6 +60,12 @@ export default class Sidebar extends Component<RouteComponentProps> {
 								<p>Preparations</p>
 							</Link>
 						</li>
+						<li>
+							<Link to={this.path(routes.PLANTITOSORPLANTITAS)}>
+								<i className='nc-icon nc-tile-56'></i>
+								<p>Plantitos/Plantitas</p>
+							</Link>
+						</li>
 					</ul>
 				</div>
 			</div>

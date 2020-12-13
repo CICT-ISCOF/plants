@@ -10,6 +10,7 @@ import Preparations from '../Preparations';
 import Tips from '../Tips';
 import Navbar from './navbar';
 import Sidebar from './sidebar';
+import PlantitoOrPlantita from '../PlantitoOrPlantita';
 
 export default class Dashboard extends Component<RouteComponentProps> {
 	async componentDidMount() {
@@ -63,6 +64,10 @@ export default class Dashboard extends Component<RouteComponentProps> {
 							<Route
 								path={this.path(routes.PREPARATIONS)}
 								component={Preparations}
+							/>
+							<Route
+								path={this.path(routes.PLANTITOSORPLANTITAS)}
+								component={PlantitoOrPlantita}
 							/>
 						</Switch>
 					</div>

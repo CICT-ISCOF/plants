@@ -5,6 +5,7 @@ import { Link, RouteComponentProps } from 'react-router-dom';
 import state from '../../services/state';
 import toastr from 'toastr';
 import Model from '../../services/model';
+import Controls from '../Controls';
 
 type State = {
 	plants: Array<Plant>;
@@ -15,6 +16,8 @@ export default class List extends Component<RouteComponentProps, State> {
 	diseaseService = new Model<Disease>(undefined, 'diseases');
 	plantService = new Model<Plant>(undefined, 'plants');
 
+	isReorganizing = false;
+
 	constructor(props: RouteComponentProps) {
 		super(props);
 		this.state = {
@@ -24,13 +27,18 @@ export default class List extends Component<RouteComponentProps, State> {
 	}
 
 	componentDidMount() {
-		this.plantService.get((plants) => this.setState({ plants }));
-		this.diseaseService.get((diseases) => this.setState({ diseases }));
+		this.plantService.get((plants) =>
+			this.isReorganizing ? null : this.setState({ plants })
+		);
+		this.diseaseService.get((diseases) =>
+			this.isReorganizing ? null : this.setState({ diseases })
+		);
 	}
 
 	findPlant(id: string, index: number) {
 		const plant = this.state.plants.find((plant) => plant.id === id);
 		if (!plant) {
+			this.isReorganizing = true;
 			const disease = this.state.diseases[index];
 			const ids = disease.affected_plant_ids.filter(
 				(plant_id) => plant_id !== id
@@ -46,7 +54,9 @@ export default class List extends Component<RouteComponentProps, State> {
 				},
 				'diseases',
 				false
-			).save();
+			)
+				.save()
+				.finally(() => (this.isReorganizing = false));
 			return 'N\\A';
 		}
 		return plant?.name;
@@ -99,6 +109,15 @@ export default class List extends Component<RouteComponentProps, State> {
 										alt={disease.title}
 										className='card-img-top'
 									/>
+									<div className='card-header'>
+										<Controls
+											model={disease}
+											{...this.props}
+											index={index}
+											remove={this.remove.bind(this)}
+											name='Disease'
+										/>
+									</div>
 									<div className='card-body'>
 										<h3 className='card-title'>
 											{disease.title}
@@ -133,92 +152,6 @@ export default class List extends Component<RouteComponentProps, State> {
 												)}
 											</ul>
 										</div>
-										{state.has('user') ? (
-											<Link
-												className='btn btn-info btn-sm'
-												to={this.path(
-													`${disease.id}/edit`
-												)}
-											>
-												Edit
-											</Link>
-										) : null}
-										{state.has('user') ? (
-											<a
-												className='btn btn-danger btn-sm'
-												href={this.path(
-													`/${disease.id}/delete`
-												)}
-												data-toggle='modal'
-												data-target={`#deleteDiseaseModal${disease.id}`}
-											>
-												Delete
-											</a>
-										) : null}
-										{state.has('user') ? (
-											<div
-												className='modal fade'
-												id={`deleteDiseaseModal${disease.id}`}
-												tabIndex={-1}
-												role='dialog'
-												aria-labelledby={`deleteDiseaseModalLabel${disease.id}`}
-												aria-hidden='true'
-											>
-												<div
-													className='modal-dialog modal-dialog-centered'
-													role='document'
-												>
-													<div className='modal-content'>
-														<div className='modal-header'>
-															<h5
-																className='modal-title'
-																id={`deleteDiseaseModalLabel${disease.id}`}
-															>
-																Delete Disease
-															</h5>
-															<button
-																type='button'
-																className='close'
-																data-dismiss='modal'
-																aria-label='Close'
-															>
-																<span aria-hidden='true'>
-																	&times;
-																</span>
-															</button>
-														</div>
-														<div className='modal-body'>
-															Are you sure you
-															want to delete{' '}
-															{disease.title}?
-														</div>
-														<div className='modal-footer'>
-															<button
-																type='button'
-																className='btn btn-danger btn-sm'
-																onClick={(
-																	e
-																) => {
-																	e.preventDefault();
-																	this.remove(
-																		index
-																	);
-																}}
-															>
-																Delete
-															</button>
-															<button
-																type='button'
-																className='btn btn-secondary btn-sm'
-																data-dismiss='modal'
-															>
-																Close
-															</button>
-														</div>
-													</div>
-												</div>
-											</div>
-										) : null}
 									</div>
 								</div>
 							</div>

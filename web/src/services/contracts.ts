@@ -62,3 +62,34 @@ export interface Preparation extends Model {
 	type: string;
 	plant_id: string;
 }
+
+export interface PlantitoItem {
+	photo_url: string;
+	body: string;
+}
+
+export interface PlantitoGuideItem {
+	title: string;
+	description: string;
+}
+
+export interface PlantitoGuide {
+	title: string;
+	description: string;
+	items: Array<PlantitoGuideItem>;
+}
+
+export interface PlantitoVariety {
+	name: string;
+	photo_url: string;
+}
+
+export interface Plantito extends Model {
+	photo_url: string;
+	type: 'Plantito' | 'Plantita';
+	name: string;
+	description: string;
+	items: Array<PlantitoItem>;
+	guides: Array<PlantitoGuide>;
+	varieties: Array<PlantitoVariety>;
+}

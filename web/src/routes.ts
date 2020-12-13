@@ -8,6 +8,7 @@ const routes = {
 	PESTS: '/pests',
 	DISEASES: '/diseases',
 	PREPARATIONS: '/preparations',
+	PLANTITOSORPLANTITAS: '/plantitos-plantitas',
 };
 
 export default routes;
