@@ -1,3 +1,5 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 export type StorageItem = {
 	[key: string]: any;
 };
@@ -9,37 +11,58 @@ export type Listeners = {
 };
 
 export class State {
-	storage = localStorage;
+	storage = AsyncStorage;
 	key = 'react-state-key';
 	listeners: Listeners = {};
+	data: StorageItem = {};
 
-	getAll(): StorageItem {
+	constructor() {
+		this.getAll().then((data) => {
+			this.data = data;
+		});
+	}
+
+	async getAll(): Promise<StorageItem> {
 		try {
-			const data = this.storage.getItem(this.key);
+			const data = await this.storage.getItem(this.key);
 			return data ? JSON.parse(data) : {};
 		} catch (error) {
 			return {};
 		}
 	}
 
-	setAll(data: StorageItem) {
-		this.storage.setItem(this.key, JSON.stringify(data));
+	async setAll(data: StorageItem) {
+		this.data = data;
+		await this.storage.setItem(this.key, JSON.stringify(data));
 		return this;
 	}
 
-	has(key: string) {
-		return key in this.getAll();
+	async has(key: string) {
+		return key in (await this.getAll());
 	}
 
-	get<T = any>(key: string): T {
-		return this.getAll()[key];
+	get<T = any>(
+		key: string,
+		fallbackValue?: T,
+		callback?: (value: T) => void
+	): T {
+		this.getAll().then((data) => {
+			if (callback) {
+				callback(data[key]);
+			}
+		});
+		if (key in this.data) {
+			return this.data[key];
+		}
+		return fallbackValue ? fallbackValue : null;
 	}
 
-	set(key: string, value: any) {
-		const data = this.getAll();
+	async set(key: string, value: any) {
+		const data = await this.getAll();
 		data[key] = value;
+		await this.setAll(data);
 		this.dispatch(key, value);
-		return this.setAll(data);
+		return this;
 	}
 
 	remove(key: string) {
