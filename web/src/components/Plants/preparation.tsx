@@ -13,6 +13,7 @@ export default class Preparation extends Component<Props> {
 				<div className='card-body'>
 					<h3 className='card-title'>{preparation.title}</h3>
 					<p className='card-text'>Type: {preparation.type}</p>
+					<p className='card-text'>{preparation.description}</p>
 					<div className='p-4'>
 						<h6>Steps</h6>
 						<ul className='list-group'>
