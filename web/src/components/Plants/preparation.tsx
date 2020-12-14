@@ -13,12 +13,14 @@ export default class Preparation extends Component<Props> {
 				<div className='card-body'>
 					<h3 className='card-title'>{preparation.title}</h3>
 					<p className='card-text'>Type: {preparation.type}</p>
-					<p className='card-text'>{preparation.description}</p>
 					<div className='p-4'>
 						<h6>Steps</h6>
 						<ul className='list-group'>
-							{preparation.steps.map((step) => (
-								<li className='list-group-item'>{step}</li>
+							{preparation.steps.map(({title, description}, index) => (
+								<li className='list-group-item' key={index}>
+									<b>{title}</b>
+									<p>{description}</p>
+								</li>
 							))}
 						</ul>
 					</div>

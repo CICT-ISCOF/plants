@@ -55,15 +55,20 @@ export interface Disease extends Model {
 	title: string;
 	symptoms: Array<string>;
 	affected_plant_ids: Array<string>;
+	images: Array<string>;
 	photo_url: string;
+	description: string;
+}
+
+export interface PreparationStep {
+	title: string;
 	description: string;
 }
 
 export interface Preparation {
 	title: string;
-	steps: Array<string>;
+	steps: Array<PreparationStep>;
 	type: string;
-	description: string;
 }
 
 export interface PlantitoItem {

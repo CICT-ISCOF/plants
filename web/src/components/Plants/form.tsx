@@ -69,8 +69,12 @@ export default class Form extends Component<
 				{
 					title: '',
 					type: '',
-					steps: [''],
-					description: '',
+					steps: [
+						{
+							title: '',
+							description: '',
+						}
+					],
 				},
 			],
 			images: [],
@@ -780,8 +784,12 @@ export default class Form extends Component<
 									this.addPreparation({
 										title: '',
 										type: '',
-										steps: [''],
-										description: '',
+										steps: [
+											{
+												title: '',
+												description: '',
+											}
+										],
 									});
 								}}
 							>
@@ -791,7 +799,7 @@ export default class Form extends Component<
 						<div className='m-1'>
 							{this.state.preparations.map(
 								(
-									{ title, type, steps, description },
+									{ title, type, steps },
 									index
 								) => (
 									<div
@@ -824,32 +832,6 @@ export default class Form extends Component<
 												);
 											}}
 										/>
-										<textarea
-											name='title'
-											id='description'
-											placeholder={`Description ${
-												index + 1
-											}`}
-											className={`form-control form-control-sm my-2 ${
-												this.state.processing
-													? 'disabled'
-													: ''
-											}`}
-											disabled={this.state.processing}
-											value={description}
-											onChange={(e) => {
-												e.preventDefault();
-												const preparation = this.getPreparation(
-													index
-												);
-												preparation.description =
-													e.target.value;
-												this.setPreparation(
-													preparation,
-													index
-												);
-											}}
-										></textarea>
 										<input
 											type='text'
 											name='type'
@@ -892,7 +874,10 @@ export default class Form extends Component<
 															index
 														);
 														preparation.steps.push(
-															''
+															{
+																	title:'',
+																	description: '',
+															}
 														);
 														this.setPreparation(
 															preparation,
@@ -903,7 +888,7 @@ export default class Form extends Component<
 													Add Step
 												</button>
 											</div>
-											{steps.map((step, stepIndex) => (
+											{steps.map(({title, description}, stepIndex) => (
 												<div>
 													<h6>
 														Step {stepIndex + 1}
@@ -915,7 +900,7 @@ export default class Form extends Component<
 														id='type'
 														placeholder={`Step ${
 															stepIndex + 1
-														}`}
+														} Title`}
 														className={`form-control form-control-sm m-2 ${
 															this.state
 																.processing
@@ -926,15 +911,50 @@ export default class Form extends Component<
 															this.state
 																.processing
 														}
-														value={step}
+														value={title}
 														onChange={(e) => {
 															e.preventDefault();
 															const preparation = this.getPreparation(
 																index
 															);
-															preparation.steps[
-																stepIndex
-															] = e.target.value;
+															const title = e.target.value;
+															const step = preparation.steps[stepIndex];
+															step.title = title;
+															preparation.steps.splice(stepIndex, 1, step);
+															this.setPreparation(
+																preparation,
+																index
+															);
+														}}
+													/>
+													<input
+														key={stepIndex}
+														type='text'
+														name='type'
+														id='type'
+														placeholder={`Step ${
+															stepIndex + 1
+														} Description`}
+														className={`form-control form-control-sm m-2 ${
+															this.state
+																.processing
+																? 'disabled'
+																: ''
+														}`}
+														disabled={
+															this.state
+																.processing
+														}
+														value={description}
+														onChange={(e) => {
+															e.preventDefault();
+															const preparation = this.getPreparation(
+																index
+															);
+															const description = e.target.value;
+															const step = preparation.steps[stepIndex];
+															step.description = description;
+															preparation.steps.splice(stepIndex, 1, step);
 															this.setPreparation(
 																preparation,
 																index
