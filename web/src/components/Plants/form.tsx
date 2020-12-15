@@ -73,7 +73,7 @@ export default class Form extends Component<
 						{
 							title: '',
 							description: '',
-						}
+						},
 					],
 				},
 			],
@@ -236,8 +236,7 @@ export default class Form extends Component<
 					onSubmit={(e) => {
 						e.preventDefault();
 						this.submit();
-					}}
-				>
+					}}>
 					<input
 						type='file'
 						name='photo'
@@ -293,8 +292,7 @@ export default class Form extends Component<
 								this.setState({
 									description: e.target.value,
 								});
-							}}
-						></textarea>
+							}}></textarea>
 					</div>
 					<div className='form-group'>
 						<label htmlFor='category_id'>Category:</label>
@@ -310,13 +308,11 @@ export default class Form extends Component<
 								this.setState({
 									category_id: e.target.value,
 								});
-							}}
-						>
+							}}>
 							{this.state.categories.map((category, index) => (
 								<option
 									value={category.id as string}
-									key={index}
-								>
+									key={index}>
 									{category.title}
 								</option>
 							))}
@@ -388,8 +384,7 @@ export default class Form extends Component<
 										'https://via.placeholder.com/200'
 									);
 									this.setState({ images });
-								}}
-							>
+								}}>
 								Add Image
 							</button>
 						</div>
@@ -397,8 +392,7 @@ export default class Form extends Component<
 							{this.state.images.map((url, index) => (
 								<div
 									className='col-12 col-md-4 col-lg-3'
-									key={index}
-								>
+									key={index}>
 									<input
 										type='file'
 										name=''
@@ -449,8 +443,7 @@ export default class Form extends Component<
 													.images;
 												images.splice(index, 1);
 												this.setState({ images });
-											}}
-										>
+											}}>
 											Remove
 										</button>
 									</div>
@@ -475,7 +468,9 @@ export default class Form extends Component<
 								'November',
 								'December',
 							].map((month, index) => (
-								<div className='col-12 col-md-4 col-lg-3'>
+								<div
+									className='col-12 col-md-4 col-lg-3'
+									key={index}>
 									<div className='custom-control custom-checkbox'>
 										<input
 											type='checkbox'
@@ -488,6 +483,9 @@ export default class Form extends Component<
 												const months = this.state
 													.months;
 												if (months.includes(month)) {
+													const index = months.indexOf(
+														month
+													);
 													months.splice(index, 1);
 												} else {
 													months.push(month);
@@ -497,8 +495,7 @@ export default class Form extends Component<
 										/>
 										<label
 											className='custom-control-label'
-											htmlFor={`month-${index}`}
-										>
+											htmlFor={`month-${index}`}>
 											{month}
 										</label>
 									</div>
@@ -536,8 +533,7 @@ export default class Form extends Component<
 														companions,
 													});
 												}
-											}}
-										>
+											}}>
 											Add Row
 										</button>
 									</td>
@@ -566,8 +562,7 @@ export default class Form extends Component<
 														this.setState({
 															companions,
 														});
-													}}
-												>
+													}}>
 													<option value='Good'>
 														Good
 													</option>
@@ -599,8 +594,7 @@ export default class Form extends Component<
 														this.setState({
 															companions,
 														});
-													}}
-												>
+													}}>
 													{this.state.plants
 														.filter(
 															(plant) =>
@@ -610,8 +604,7 @@ export default class Form extends Component<
 														.map((plant, index) => (
 															<option
 																value={plant.id}
-																key={index}
-															>
+																key={index}>
 																{plant.name}
 															</option>
 														))}
@@ -638,8 +631,7 @@ export default class Form extends Component<
 														this.setState({
 															companions,
 														});
-													}}
-												>
+													}}>
 													Remove
 												</button>
 											</td>
@@ -691,8 +683,7 @@ export default class Form extends Component<
 
 												this.layoutInputRefs.push(ref);
 												this.setState({ layouts });
-											}}
-										>
+											}}>
 											Add Row
 										</button>
 									</td>
@@ -761,8 +752,7 @@ export default class Form extends Component<
 														.layouts;
 													layouts.splice(index, 1);
 													this.setState({ layouts });
-												}}
-											>
+												}}>
 												Remove
 											</button>
 										</td>
@@ -788,24 +778,19 @@ export default class Form extends Component<
 											{
 												title: '',
 												description: '',
-											}
+											},
 										],
 									});
-								}}
-							>
+								}}>
 								Add Row
 							</button>
 						</div>
 						<div className='m-1'>
 							{this.state.preparations.map(
-								(
-									{ title, type, steps },
-									index
-								) => (
+								({ title, type, steps }, index) => (
 									<div
 										className='mx-1 my-3 p-2 shadow rounded border'
-										key={index}
-									>
+										key={index}>
 										<h5>Preparation {index + 1}</h5>
 										<input
 											type='text'
@@ -873,124 +858,143 @@ export default class Form extends Component<
 														const preparation = this.getPreparation(
 															index
 														);
-														preparation.steps.push(
-															{
-																	title:'',
-																	description: '',
-															}
-														);
+														preparation.steps.push({
+															title: '',
+															description: '',
+														});
 														this.setPreparation(
 															preparation,
 															index
 														);
-													}}
-												>
+													}}>
 													Add Step
 												</button>
 											</div>
-											{steps.map(({title, description}, stepIndex) => (
-												<div>
-													<h6>
-														Step {stepIndex + 1}
-													</h6>
-													<input
-														key={stepIndex}
-														type='text'
-														name='type'
-														id='type'
-														placeholder={`Step ${
-															stepIndex + 1
-														} Title`}
-														className={`form-control form-control-sm m-2 ${
-															this.state
-																.processing
-																? 'disabled'
-																: ''
-														}`}
-														disabled={
-															this.state
-																.processing
-														}
-														value={title}
-														onChange={(e) => {
-															e.preventDefault();
-															const preparation = this.getPreparation(
-																index
-															);
-															const title = e.target.value;
-															const step = preparation.steps[stepIndex];
-															step.title = title;
-															preparation.steps.splice(stepIndex, 1, step);
-															this.setPreparation(
-																preparation,
-																index
-															);
-														}}
-													/>
-													<input
-														key={stepIndex}
-														type='text'
-														name='type'
-														id='type'
-														placeholder={`Step ${
-															stepIndex + 1
-														} Description`}
-														className={`form-control form-control-sm m-2 ${
-															this.state
-																.processing
-																? 'disabled'
-																: ''
-														}`}
-														disabled={
-															this.state
-																.processing
-														}
-														value={description}
-														onChange={(e) => {
-															e.preventDefault();
-															const preparation = this.getPreparation(
-																index
-															);
-															const description = e.target.value;
-															const step = preparation.steps[stepIndex];
-															step.description = description;
-															preparation.steps.splice(stepIndex, 1, step);
-															this.setPreparation(
-																preparation,
-																index
-															);
-														}}
-													/>
-													<button
-														className={`btn btn-danger btn-sm ${
-															this.state
-																.processing
-																? 'disabled'
-																: ''
-														}`}
-														disabled={
-															this.state
-																.processing
-														}
-														onClick={(e) => {
-															e.preventDefault();
-															const preparation = this.getPreparation(
-																index
-															);
-															preparation.steps.splice(
-																stepIndex,
-																1
-															);
-															this.setPreparation(
-																preparation,
-																index
-															);
-														}}
-													>
-														Remove Step
-													</button>
-												</div>
-											))}
+											{steps.map(
+												(
+													{ title, description },
+													stepIndex
+												) => (
+													<div key={stepIndex}>
+														<h6>
+															Step {stepIndex + 1}
+														</h6>
+														<input
+															type='text'
+															name='type'
+															id='type'
+															placeholder={`Step ${
+																stepIndex + 1
+															} Title`}
+															className={`form-control form-control-sm m-2 ${
+																this.state
+																	.processing
+																	? 'disabled'
+																	: ''
+															}`}
+															disabled={
+																this.state
+																	.processing
+															}
+															value={title}
+															onChange={(e) => {
+																e.preventDefault();
+																const preparation = this.getPreparation(
+																	index
+																);
+																const title =
+																	e.target
+																		.value;
+																const step =
+																	preparation
+																		.steps[
+																		stepIndex
+																	];
+																step.title = title;
+																preparation.steps.splice(
+																	stepIndex,
+																	1,
+																	step
+																);
+																this.setPreparation(
+																	preparation,
+																	index
+																);
+															}}
+														/>
+														<input
+															type='text'
+															name='type'
+															id='type'
+															placeholder={`Step ${
+																stepIndex + 1
+															} Description`}
+															className={`form-control form-control-sm m-2 ${
+																this.state
+																	.processing
+																	? 'disabled'
+																	: ''
+															}`}
+															disabled={
+																this.state
+																	.processing
+															}
+															value={description}
+															onChange={(e) => {
+																e.preventDefault();
+																const preparation = this.getPreparation(
+																	index
+																);
+																const description =
+																	e.target
+																		.value;
+																const step =
+																	preparation
+																		.steps[
+																		stepIndex
+																	];
+																step.description = description;
+																preparation.steps.splice(
+																	stepIndex,
+																	1,
+																	step
+																);
+																this.setPreparation(
+																	preparation,
+																	index
+																);
+															}}
+														/>
+														<button
+															className={`btn btn-danger btn-sm ${
+																this.state
+																	.processing
+																	? 'disabled'
+																	: ''
+															}`}
+															disabled={
+																this.state
+																	.processing
+															}
+															onClick={(e) => {
+																e.preventDefault();
+																const preparation = this.getPreparation(
+																	index
+																);
+																preparation.steps.splice(
+																	stepIndex,
+																	1
+																);
+																this.setPreparation(
+																	preparation,
+																	index
+																);
+															}}>
+															Remove Step
+														</button>
+													</div>
+												)
+											)}
 										</div>
 										<div className='m-1'>
 											<button
@@ -1011,8 +1015,7 @@ export default class Form extends Component<
 													this.setState({
 														preparations,
 													});
-												}}
-											>
+												}}>
 												Remove Preparation
 											</button>
 										</div>
@@ -1027,8 +1030,7 @@ export default class Form extends Component<
 							className={`btn btn-primary btn-sm ${
 								this.state.processing ? 'disabled' : ''
 							}`}
-							disabled={this.state.processing}
-						>
+							disabled={this.state.processing}>
 							{this.state.processing ? 'Saving...' : 'Save'}
 						</button>
 					</div>
