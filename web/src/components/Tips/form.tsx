@@ -17,13 +17,8 @@ type Params = {
 	id: string;
 };
 
-export default class Form extends Component<
-	RouteComponentProps<Params>,
-	State
-> {
-	fileInputRefs: Array<RefObject<HTMLInputElement>> = [
-		createRef<HTMLInputElement>(),
-	];
+export default class Form extends Component<RouteComponentProps<Params>, State> {
+	fileInputRefs: Array<RefObject<HTMLInputElement>> = [createRef<HTMLInputElement>()];
 
 	constructor(props: RouteComponentProps<Params>) {
 		super(props);
@@ -51,9 +46,12 @@ export default class Form extends Component<
 				.doc(id)
 				.get()
 				.then((document) => {
+					const tip = document.data() as Tip;
+					this.fileInputRefs = [];
+					tip.items.forEach(() => this.fileInputRefs.push(createRef<HTMLInputElement>()));
 					this.setState({
 						mode: 'Edit',
-						...(document.data() as Tip),
+						...tip,
 						id: document.id,
 						processing: false,
 					});
@@ -106,7 +104,7 @@ export default class Form extends Component<
 		const fileReader = new FileReader();
 		fileReader.onload = (event) => {
 			const item = this.getItem(index);
-			item.photo_url = event.target?.result as string;
+			item.photo_url = event.target ? String(event.target.result) : 'https://via.placeholder.com/200';
 			this.setItem(item, index);
 		};
 		fileReader.readAsDataURL(file);
@@ -136,8 +134,7 @@ export default class Form extends Component<
 					onSubmit={(e) => {
 						e.preventDefault();
 						this.submit();
-					}}
-				>
+					}}>
 					<div className='form-group'>
 						<label htmlFor='title'>Title:</label>
 						<input
@@ -145,9 +142,7 @@ export default class Form extends Component<
 							name='title'
 							id='title'
 							placeholder='Title'
-							className={`form-control form-control-sm ${
-								this.state.processing ? 'disabled' : ''
-							}`}
+							className={`form-control form-control-sm ${this.state.processing ? 'disabled' : ''}`}
 							value={this.state.title}
 							onChange={(e) => {
 								e.preventDefault();
@@ -169,20 +164,16 @@ export default class Form extends Component<
 								this.addItem({
 									title: '',
 									description: '',
-									photo_url:
-										'https://via.placeholder.com/200',
+									photo_url: 'https://via.placeholder.com/200',
 								});
-							}}
-						>
+							}}>
 							Add Item
 						</button>
 						<div>
 							{this.state.items.map((item, index) => (
 								<div className='py-2 px-3 shadow border rounded bg-white m-2'>
 									<div className='form-group'>
-										<h3 className='mt-3'>
-											Item {index + 1}:
-										</h3>
+										<h3 className='mt-3'>Item {index + 1}:</h3>
 										<div className='text-center'>
 											<img
 												src={item.photo_url}
@@ -206,8 +197,7 @@ export default class Form extends Component<
 											onChange={(e) => {
 												e.preventDefault();
 												if (e.target.files) {
-													const file =
-														e.target.files[0];
+													const file = e.target.files[0];
 													this.setFile(file, index);
 												}
 											}}
@@ -216,18 +206,12 @@ export default class Form extends Component<
 											type='text'
 											name={`item-title-${index}`}
 											placeholder={`Title ${index + 1}`}
-											className={`form-control form-control-sm mb-3 ${
-												this.state.processing
-													? 'disabled'
-													: ''
-											}`}
+											className={`form-control form-control-sm mb-3 ${this.state.processing ? 'disabled' : ''}`}
 											disabled={this.state.processing}
 											value={item.title}
 											onChange={(e) => {
 												e.preventDefault();
-												const item = this.getItem(
-													index
-												);
+												const item = this.getItem(index);
 												item.title = e.target.value;
 												this.setItem(item, index);
 											}}
@@ -235,34 +219,23 @@ export default class Form extends Component<
 										/>
 										<textarea
 											name={`item-description-${index}`}
-											placeholder={`Description ${
-												index + 1
-											}`}
-											className={`form-control form-control-sm ${
-												this.state.processing
-													? 'disabled'
-													: ''
-											}`}
+											placeholder={`Description ${index + 1}`}
+											className={`form-control form-control-sm ${this.state.processing ? 'disabled' : ''}`}
 											disabled={this.state.processing}
 											value={item.description}
 											onChange={(e) => {
 												e.preventDefault();
-												const item = this.getItem(
-													index
-												);
-												item.description =
-													e.target.value;
+												const item = this.getItem(index);
+												item.description = e.target.value;
 												this.setItem(item, index);
 											}}
-											id={`item-description-${index}`}
-										></textarea>
+											id={`item-description-${index}`}></textarea>
 										<button
 											className='btn btn-dark btn-sm'
 											onClick={(e) => {
 												e.preventDefault();
 												this.removeItem(index);
-											}}
-										>
+											}}>
 											Remove
 										</button>
 									</div>
@@ -273,11 +246,8 @@ export default class Form extends Component<
 					<div className='form-group'>
 						<button
 							type='submit'
-							className={`btn btn-primary btn-sm ${
-								this.state.processing ? 'disabled' : ''
-							}`}
-							disabled={this.state.processing}
-						>
+							className={`btn btn-primary btn-sm ${this.state.processing ? 'disabled' : ''}`}
+							disabled={this.state.processing}>
 							{this.state.processing ? 'Saving...' : 'Save'}
 						</button>
 					</div>
