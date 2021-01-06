@@ -36,12 +36,17 @@ export interface Plant extends Model {
 	category_id: string;
 	photo_url: string;
 	schedule_image_url: string;
-	images: Array<string>;
+	images: Array<PlantImage>;
 	months: Array<string>;
 	companions: Array<PlantCompanion>;
 	description: string;
 	layouts: Array<string>;
 	preparations: Array<Preparation>;
+}
+
+export interface PlantImage {
+	title: string;
+	url: string;
 }
 
 export interface Pest extends Model {
